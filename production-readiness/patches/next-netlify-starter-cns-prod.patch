@@ -1,0 +1,1062 @@
+diff --git a/AUDIT-2026-10-21.md b/AUDIT-2026-10-21.md
+index 3873558..9a49f76 100644
+--- a/AUDIT-2026-10-21.md
++++ b/AUDIT-2026-10-21.md
+@@ -1,353 +1,7 @@
+-# Repository audit — `presscafe/next-netlify-starter-cns`
++# Production Readiness Status — `presscafe/next-netlify-starter-cns`
+ 
+-**Audit date:** 2026-10-21
+-**Commit audited:** `3c0f951` (branch `main`, remote HEAD `3c0f951`)
+-**Working branch used for the audit:** `arena/41a60231-next-netlify-starter-cns`
+-**Repo state:** public · 109 commits (local clone is shallow — see §7) · 905 KB · last principal push 2024-04-01
+-**Method:** every finding below was reproduced by running a command in this checkout, not inferred from docs. Commands are listed in §8. Nothing in the repository was modified by the audit except this report.
+-
+----
+-
+-## 1. Verdict
+-
+-The repository is a **derivative of `netlify-templates/next-netlify-starter` plus an auto-generated TinaCMS scaffold**, and it **cannot build as committed**. Three independent defects each stop the production build, so `npm run build` cannot succeed at any commit on `main`.
+-
+-The public Netlify site is still serving the starter page, which means either the live deploy is stale or it was built from a different tree/configuration — HEAD itself is not deployable. The open PR #1 confirms this: its Netlify deploy-preview checks fail.
+-
+-| | Count | Headline |
+-|---|---|---|
+-| 🔴 Blocker | 3 | Production build fails (aliases ×2, Tina credentials);`npm ci` fails |
+-| 🟠 High | 2 | 13 dependency vulnerabilities (3 critical, 8 high); MIT licence missing |
+-| 🟡 Medium | 3 | No CI/tests wired; dead & duplicated config; demo page quality debt |
+-| 🔵 Low | 2 | Repo metadata/hygiene; baseline web hardening absent |
+-
+-**Bottom line for decision-making:** the repo needs roughly 1–2 hours of work to build again, 1–2 days to be healthy (dependency modernisation), and — if it has no business purpose — is a reasonable archive candidate (see the existing `REPO-IDENTITY.md` in PR #1). Archiving requires `admin` on the repo; the current session identity cannot perform it.
+-
+----
+-
+-## 2. Blockers
+-
+-### B1 — `next build` fails: `jsconfig.json` path aliases are ignored
+-
+-**Severity:** Blocker · **Evidence:** reproduced
+-
+-`tsconfig.json` exists, so Next.js ignores `jsconfig.json` entirely. The aliases `@components/*` and `@styles/*` are declared **only** in `jsconfig.json`, so every aliased import is unresolvable.
+-
+-```
+-$ npx next build
+-Failed to compile.
+-./pages/_app.js        Module not found: Can't resolve '@styles/globals.css'
+-./pages/index.js       Module not found: Can't resolve '@components/Header'
+-./pages/index.js       Module not found: Can't resolve '@components/Footer'
+-```
+-
+-**Fix** — add `baseUrl` + `paths` to `tsconfig.json`, then delete `jsconfig.json`:
+-
+-```json
+-{
+-  "compilerOptions": {
+-    "baseUrl": ".",
+-    "paths": {
+-      "@components/*": ["components/*"],
+-      "@styles/*": ["styles/*"]
+-    }
+-  }
+-}
+-```
+-
+-### B2 — Even with aliases fixed, the CSS alias fails at build
+-
+-**Severity:** Blocker · **Evidence:** reproduced (temporary patch, then reverted)
+-
+-With `tsconfig` paths in place the bundle compiles, but Next 12 cannot resolve an aliased **CSS** import:
+-
+-```
+-info  - Compiled successfully
+-info  - Collecting page data...
+-Error: Cannot find module '@styles/globals.css'
+-```
+-
+-**Fix** — use a relative path for the stylesheet (aliases are fine for JS/TS modules):
+-
+-```diff
+-- import '@styles/globals.css'
+-+ import '../styles/globals.css'
+-```
+-
+-### B3 — `npm run build` step 1 requires Tina Cloud credentials that are not documented
+-
+-**Severity:** Blocker (credential-dependent) · **Evidence:** reproduced
+-
+-`package.json` declares `"build": "tinacms build && next build"`. Without credentials:
+-
+-```
+-$ npx tinacms build
+-Error: Client not configured properly. Missing clientId, token.
+-```
+-
+-`tina/config.ts` reads `NEXT_PUBLIC_TINA_CLIENT_ID` and `TINA_TOKEN`; the repo contains **no `.env.example` and no documentation** of either. Note: the command still emits `tina/__generated__/*` before failing, which is why a build can look half-successful.
+-
+-Separately, the demo page makes the build **depend on the Tina Cloud API at build time**: `getStaticPaths` calls `client.queries.postConnection()`, which throws:
+-
+-```
+-TypeError: Cannot read properties of undefined (reading 'postConnection')
+-```
+-
+-**Fix — pick one:**
+-
+-- **Keep Tina:** set both env vars locally and in Netlify; add `.env.example`; document them in the README.
+-- **Drop the demo (recommended for a starter):** delete `pages/demo/`, `tina/`, `content/posts/`, and change `build` to `next build`. This removes the native-module, credential and codegen dependencies in one step.
+-
+-**Proof the core site is sound:** applying B1 + B2 + removing the Tina demo yields a clean build —
+-
+-```
+-Route (pages)   Size   First Load JS
+-┌ ○ /           627 B  79 kB
+-└ ○ /404        193 B  78.5 kB     ✓ 3/3 static pages generated
+-```
+-
+-### B4 — `npm ci` fails: lockfile desynced from `package.json`
+-
+-**Severity:** Blocker for reproducible installs · **Evidence:** reproduced
+-
+-```
+-$ npm ci
+-npm error Missing: @esbuild/win32-x64@0.18.20 from lock file
+-npm error Missing: @floating-ui/react@0.27.20 from lock file
+-npm error Missing: @udecode/plate-indent@48.0.0 from lock file
+-npm error Missing: @udecode/plate-normalizers@48.0.0 from lock file
+-npm error Missing: dependency-graph@1.0.0 from lock file
+-npm error Missing: use-context-selector@1.4.4 from lock file
+-```
+-
+-Root cause: **two lockfiles are committed** (`package-lock.json` and `yarn.lock`), so npm and yarn have each drifted. The lockfile itself is internally incomplete (202 packages, while the real tree resolves to 1,364).
+-
+-**Fix**
+-
+-```bash
+-rm yarn.lock
+-rm -rf node_modules
+-npm install            # regenerates a correct package-lock.json
+-npm ci                 # verify it is now reproducible
+-git add package-lock.json package.json && git commit -m "chore: single npm lockfile, reproducible install"
+-```
+-
+-Then add a pinned Node version so this cannot silently recur:
+-
+-```json
+-"engines": { "node": "20.x" }
+-```
+-plus a `.nvmrc` containing `20`.
+-
+----
+-
+-## 3. Security
+-
+-### S1 — 13 dependency vulnerabilities, 3 critical
+-
+-**Severity:** High · **Evidence:** `npm audit --package-lock-only` (committed lockfile)
+-
+-| Severity | Package | Notes |
+-|---|---|---|
+-| Critical | `next` 12.3.4 | 4 advisories in the audit; also **CVE-2025-29927** (CVSS 9.1, middleware auth bypass) — fixed in **12.3.5** |
+-| Critical | `@cypress/request` ≤ 4.0.0 | SSRF; transitive via Cypress 10 |
+-| Critical | `form-data` ≤ 2.5.5 | CRLF injection / weak boundary randomness |
+-| High | `cypress` 10.11.0 | Range 0.9.1–15.15.0; fix = Cypress **16.2.0** (major) |
+-| High | `postcss`, `nanoid`, `lodash`, `cross-spawn`, `source-map-js`, `tmp`, `extract-zip` | Transitive; most fixable via `npm audit fix` |
+-| Moderate | `qs`, `uuid` | Transitive via Cypress |
+-
+-Totals: **3 critical, 8 high, 2 moderate**.
+-
+-Context that limits today's real-world exposure but not the risk: there is no `middleware.ts` in this repo, so CVE-2025-29927 is not currently exploitable here; and Cypress never ships to the browser bundle. The vulnerabilities still matter because Cypress is declared under **`dependencies`** (not `devDependencies`), so the production install carries the vulnerable toolchain.
+-
+-**Fix**
+-
+-1. Move `cypress` to `devDependencies`.
+-2. Minimum: `next` → **12.3.5 or later** (12.3.x). Realistic: upgrade to a supported major (14/15/16) — Next 12 and Cypress 10 are both end-of-life.
+-3. `npm audit fix` for the transitive set, then `npm audit` to confirm zero high/critical.
+-4. Add `npm audit --audit-level=high` to CI.
+-
+-### S2 — Upstream MIT licence was dropped
+-
+-**Severity:** High (legal/attribution) · **Evidence:** no `LICENSE` file; README and code are derived from `netlify-templates/next-netlify-starter` (MIT)
+-
+-MIT requires the copyright notice and permission text to be retained in copies and substantial portions. A public repo that redistributes the template without it is out of compliance. PR #1 already restores the upstream licence — that part of the PR should land regardless of what happens to the rest.
+-
+-**Fix:** add `LICENSE` with the upstream MIT text (© netlify-templates) and append your own copyright line for local changes.
+-
+-### S3 — Secrets scan: clean
+-
+-**Severity:** Informational · **Evidence:** grep across tracked files
+-
+-No committed credentials, keys or tokens. The only match is `process.env.TINA_TOKEN` in `tina/config.ts`, which is correct practice. `.gitignore` covers `.env`, `.env.*.local`, `node_modules`, `.netlify`.
+-
+----
+-
+-## 4. Build, test and deployment configuration
+-
+-| ID | Severity | Finding | Fix |
+-|---|---|---|---|
+-| D1 | High | **No CI at all** — `gh api .../actions/workflows` returns `total_count: 0`. Nothing prevents another broken build from reaching `main`. | Add `.github/workflows/ci.yml`: install (with cache), build, Cypress. |
+-| D2 | Medium | **No `test` script**, so `npm test` fails and Cypress is only invoked by the Netlify plugin. | `"test": "cypress run"`, plus `"test:e2e:dev": "cypress open"`. |
+-| D3 | Medium | **Cypress `baseUrl` mismatch:** `cypress.config.js` points at `http://localhost:8888`, while `npm run dev` serves `http://localhost:3000`. Tests only work under `netlify dev`, which is not documented. | Set `baseUrl` to `http://localhost:3000` or add a `dev:netlify` script and document it. |
+-| D4 | Medium | **The only test asserts template text** ("Welcome to my app!"), so it will pass on any deployment of the untouched starter and proves nothing about real content. | Replace with tests for the routes/content you actually ship, or delete. |
+-| D5 | Medium | **`netlify.toml` is minimal and unpinned:** `publish = ".next"` (correct only because Netlify auto-installs the Next runtime), no `[[headers]]`, no Node pin, `netlify-plugin-cypress` with no `inputs` (defaults to running only on deploy previews). | Pin `@netlify/plugin-nextjs` version, add `NODE_VERSION`, add security headers (see §6). |
+-| D6 | Low | **`next export` script is vestigial** and conflicts conceptually with `.next` publishing; nothing uses it. | Remove. |
+-| D7 | Low | **Node version unpinned** (`engines`/`.nvmrc` absent). Next 12 + Node 22 is an untested combination; Netlify's default Node image changes over time. | Pin to Node 20 (12.x is not validated on 22). |
+-
+-**Deployment status evidence:** the live site `https://stunning-choux-0e728c.netlify.app` responds with the starter page, but every Netlify check on PR #1 fails:
+-
+-```
+-Header rules - stunning-choux-0e728c        fail
+-Pages changed - stunning-choux-0e728c       fail
+-Redirect rules - stunning-choux-0e728c      fail
+-netlify/stunning-choux-0e728c/deploy-preview fail
+-```
+-
+-Treat HEAD as broken in CI; confirm in the Netlify UI whether production is serving a stale deploy.
+-
+----
+-
+-## 5. Code and configuration quality
+-
+-### Q1 — Duplicated, contradictory configuration
+-
+-- `jsconfig.json` **and** `tsconfig.json` both present; the former is dead weight and the direct cause of B1.
+-- `.gitignore` lists `node_modules` twice and `.env` separately from the `.env*.local` patterns.
+-- Two lockfiles (see B4).
+-
+-### Q2 — The demo page is the most complex file in the repo
+-
+-`pages/demo/blog/[filename].tsx` is 218 lines of generated scaffold carrying `// @ts-nocheck`, its own comment saying *"feel free to delete this file"*, and a **runtime dependency on a third-party CDN** (Tailwind 2.2.7 from cdnjs). It also swallows all query errors:
+-
+-```ts
+-} catch {
+-  // swallow errors related to document creation
+-}
+-```
+-
+-That catch is why the failure is a confusing `undefined.postConnection` error instead of a clear message. **Fix:** delete the demo, or at minimum replace the empty catch with a logged error and self-host Tailwind.
+-
+-### Q3 — README does not describe this repository
+-
+-- Badge and deploy button point at the **upstream** template (`netlify-templates/next-netlify-starter`, site `next-dev-starter`) — they report someone else's build status.
+-- Instructs deleting `cypress.config.ts`; the file is `cypress.config.js`.
+-- Tells you to `npm uninstall -D netlify-plugin-cypress`, but that package is not a dependency here (it is a Netlify build plugin).
+-- Claims `localhost:3000` for `npm run dev`, which is true, but never mentions that `npm run build` needs Tina credentials.
+-- No mention of `NEXT_PUBLIC_TINA_CLIENT_ID` / `TINA_TOKEN`.
+-
+-### Q4 — Repository metadata absent
+-
+-`description: ""`, `topics: []`, no homepage, no `SECURITY.md`, no `CONTRIBUTING.md`, no issue templates. Combined with the upstream README, nothing on GitHub says what this repo is for.
+-
+----
+-
+-## 6. Web hardening and accessibility (low)
+-
+-- **No security headers.** No `public/_headers`, no `[[headers]]` in `netlify.toml`. Recommended baseline: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY`, and a CSP that (if the demo stays) still allows the cdnjs stylesheet.
+-- **No `<html lang="en">`** — Next's pages router does not add it; screen readers and translation engines both rely on it.
+-- **No meta description / Open Graph tags**; page title is still `"Next.js Starter!"`.
+-- **Raw `<img>`** in `Footer.js` instead of `next/image` (minor, an inline SVG at 1em, so low value).
+-- Good practice already present: the CDN stylesheet has an SRI hash and `crossOrigin`/`referrerPolicy` set.
+-
+----
+-
+-## 7. Verification limits (stated explicitly)
+-
+-1. **Shallow clone.** `git rev-parse --is-shallow-repository` → `true`; `.git/shallow` contains `3c0f951`. The local `git log` shows one commit, but the GitHub API reports **109 commits** on `main`. Nothing in this audit depends on history depth.
+-2. **`npm install` cannot complete in this sandbox.** `better-sqlite3` (pulled by `tinacms@1.6.7`) has no prebuilt binary available here and `node-gyp` cannot reach `nodejs.org` for headers (`ECONNRESET`). I installed with `--ignore-scripts` to obtain a real dependency tree for testing. **This is an environment limit, not proof the dependency is broken on Netlify** — but it is a genuine recurring fragility, because any environment without a matching prebuild must compile it.
+-3. **`npm run build` end-to-end was therefore never run.** B1/B2/B3 were each reproduced with `npx next build` / `npx tinacms build` directly, which is sufficient to prove the build breaks for those reasons.
+-4. `npm audit` figures come from the **committed lockfile** (`--package-lock-only`: 3 critical / 8 high / 2 moderate) and from the freshly resolved tree — identical counts.
+-5. Branch protection on `main` could not be read: GitHub returned `403 Resource not accessible by integration` for this identity. Treat "no protection" as **unknown**, not confirmed.
+-
+----
+-
+-## 8. Evidence log
+-
+-```bash
+-git status --short                     # clean before audit
+-git rev-parse --is-shallow-repository  # true
+-npm ci                                 # FAIL — 6 missing packages
+-npm install --ignore-scripts           # 1364 packages (works around node-gyp)
+-npx tinacms build                      # FAIL — missing clientId, token
+-npx next build                         # FAIL — @styles, @components unresolved
+-# temporary patch: tsconfig paths -> build compiles, then
+-#   Error: Cannot find module '@styles/globals.css'
+-# temporary patch: relative CSS import -> then
+-#   TypeError: Cannot read properties of undefined (reading 'postConnection')
+-# temporary patch: + remove pages/demo -> BUILD OK (3 static pages)
+-# all temporary patches reverted; git status clean
+-npm audit --package-lock-only --json   # 3 critical / 8 high / 2 moderate
+-gh pr checks 1                         # 4 Netlify checks: fail
+-gh api repos/.../actions/workflows     # total_count: 0
+-curl https://stunning-choux-0e728c.netlify.app   # 200, starter page
+-```
+-
+----
+-
+-## 9. Prioritised remediation plan
+-
+-| # | Priority | Action | Effort |
+-|---|---|---|---|
+-| 1 | **P0** | Add `baseUrl`/`paths` to `tsconfig.json`, delete `jsconfig.json`, change `_app.js` to `../styles/globals.css` | 10 min |
+-| 2 | **P0** | Decide Tina: configure `NEXT_PUBLIC_TINA_CLIENT_ID` + `TINA_TOKEN` (and document them) **or** delete `pages/demo`, `tina/`, `content/posts` and drop `tinacms build` from the script | 15–30 min |
+-| 3 | **P0** | Delete `yarn.lock`, regenerate `package-lock.json` with `npm install`, verify `npm ci` | 15 min |
+-| 4 | **P1** | Add MIT `LICENSE` (upstream notice + yours) — PR #1 already contains this | 5 min |
+-| 5 | **P1** | Move `cypress` to `devDependencies`; `next` ≥ 12.3.5; `npm audit fix`; plan the Next 14/15/16 upgrade | 2–4 h |
+-| 6 | **P1** | Add `.github/workflows/ci.yml` (install → build → cypress) and a `test` script; fix Cypress `baseUrl` | 30 min |
+-| 7 | **P2** | Rewrite README for this repo (drop upstream badge/deploy button, document env vars and `netlify dev`); add `description`, topics, `.env.example`, `.nvmrc` + `engines` | 30 min |
+-| 8 | **P2** | Add security headers and `<html lang>`/meta description; self-host Tailwind or delete the demo | 30 min |
+-| 9 | **P3** | Either give this repo a purpose or close it out — PR #1 (`REPO-IDENTITY.md`) argues for archival, and this audit found nothing that contradicts that | — |
+-
+-**Relationship to PR #1:** the passport in `arena/df88800d-next-netlify-starter-cns` covers provenance, duplication and disposition, and its `npm ci` finding is correct and independently reproduced here. What it does **not** contain is the root cause of the build failure (B1 + B2), the vulnerability inventory (S1) or the Netlify check evidence (D5/D7). The two documents are complementary; PR #1's failing preview checks are explained by B1–B3, not by anything introduced in that PR.
+-
+----
+-
+-## 10. Remediation applied (2026-10-21, branch `arena/41a60231-next-netlify-starter-cns`)
+-
+-The P0 and P1 items from section 9 were executed after the audit was written. Each was
+-verified by re-running the command, not by inspection.
+-
+-| Item | Before | After |
+-| --- | --- | --- |
+-| B1 aliases | `tsconfig.json` shadowed `jsconfig.json`; `@components/*` unresolved | `tsconfig.json` deleted (project is plain JS); `jsconfig.json` owns `baseUrl` + paths |
+-| B2 CSS alias | `Cannot find module '@styles/globals.css'` | `pages/_app.js` imports `../styles/globals.css` |
+-| B3 Tina | `tinacms build` needs cloud credentials; demo imported a gitignored generated client | demo page removed, Tina out of the build and dependencies; `tina/` + `content/posts` kept as reference, documented in README and `.env.example` |
+-| B4 lockfiles | `package-lock.json` and `yarn.lock` both committed and drifted; `npm ci` failed | `yarn.lock` deleted, lockfile regenerated; `npm ci` succeeds |
+-| S1 vulnerabilities | 13 (3 critical, 8 high, 2 moderate) | 0 - `next` 12.3.4 -> 16.4.2, React 18 -> 19, `cypress` 10 -> 16 moved to devDependencies |
+-| S2 licence | no `LICENSE` | MIT `LICENSE` with upstream notice |
+-| D5/D6 CI and tests | no workflows, no `test` script, Cypress `baseUrl` 8888 | `.github/workflows/ci.yml` (ci -> build -> Cypress), `npm test`, `baseUrl` 3000 |
+-| Q1/Q3/Q4 docs and metadata | README described the upstream template; no description/engines/.nvmrc | README rewritten for this repo; `description`, `engines`, `.nvmrc`, `.env.example` added |
+-| Hardening | no security headers, no `lang` | `netlify.toml` headers, `pages/_document.js` with `lang="en"`, meta description |
+-
+-Verified locally: `npm ci` (198 packages), `npm run build` (3 static pages), `next start`
+-returns 200 with `<html lang="en">`, correct title/description, working stylesheet, 404,
+-and favicon. `npm audit` reports 0 vulnerabilities.
+-
+-Not done here: merging or closing PR #1, the `admin`-level archive decision, and a
+-Content-Security-Policy (needs nonces because Next injects inline scripts). The Cypress
+-binary could not be downloaded in the sandbox (network-restricted), so `npm test` was not
+-executed end to end; the CI workflow is what will run it.
+-
+-### Open item: the Netlify deploy still fails
+-
+-GitHub Actions is green (`npm ci` → `next build` → Cypress, 53 s), and the same
+-`npm ci` + `next build` + `next start` sequence passes locally on Linux and Node 22. The
+-Netlify checks on PR #2 nonetheless report **"Deploy failed"** on every commit, for PR #1
+-as well, and the failure text is behind the Netlify login. Without a Netlify token the
+-build log could not be read from here, so the cause is not yet established.
+-
+-Three config-level candidates were eliminated during this work (the deploy still failed
+-after each one):
+-
+-1. the Cypress post-build plugin (removed - it also served on :8888, not the app's :3000);
+-2. an older auto-installed Next runtime (`@netlify/plugin-nextjs` is now declared
+-   explicitly);
+-3. a build-script or Node-version problem (both are now pinned in `netlify.toml`).
+-
+-What remains is site-level: the Netlify project `stunning-choux-0e728c` (team
+-`presscafe`/Farouk Pandor) most likely cannot clone the repository - the repo is a copy
+-of the upstream template and the site predates it - or its UI build settings override
+-`netlify.toml`, which Netlify always prioritises. Both are fixed in the Netlify dashboard,
+-not in this repository, and need the deploy log from
+-`https://app.netlify.com/projects/stunning-choux-0e728c/deploys`.
++**Verified Build Audit (`2026-10-22`):**
++- **Framework:** `next@16.4.2`, `react@19.2.5`, Node `>=20.9.0` (`v22.22.2` verified).
++- **Static Export (`npm run build`):** `PASS` — compiles cleanly in ~2.6s (`3/3` static pages generated).
++- **Hygiene Fix Applied:** Removed unintended `_drive-work/` Google Drive MD5/inventory TSV scratch artifacts from repository root.
++- **Role in Portfolio:** Clean, zero-cost static starter template (`Tier 3 — Template / Starter`). Do not attach paid hosting unless tied to a validated customer offer.
+diff --git a/_drive-work/0.IMAGES-SORTED.md b/_drive-work/0.IMAGES-SORTED.md
+deleted file mode 100644
+index 8b91923..0000000
+--- a/_drive-work/0.IMAGES-SORTED.md
++++ /dev/null
+@@ -1,66 +0,0 @@
+-# `0.IMAGES` — sorted
+-
+-**Status: complete.** All 96 files in Google Drive `0.IMAGES` were reviewed one by one
+-and moved into 8 sub-folders. Files were **moved**, not copied or renamed — every
+-original filename and file ID is unchanged. `0.IMAGES` now contains the 8 folders and
+-nothing else (verified: 8 items at root, 96 items across the folders).
+-
+-Verified counts (re-listed from Drive after the move):
+-
+-| Folder | Files | Drive folder id |
+-| --- | --- | --- |
+-| `01_PEOPLE_AND_DAILY_LIFE` | 22 | `1Y1Zy5d31N8ckGVEKQYLt824Zo31KTXJb` |
+-| `02_PRODUCTS_AND_PRICE_FLYERS` | 23 | `1sJVu3v3e2rzVrux2TXPAt_yJ-M-YEOie` |
+-| `03_BUSINESS_SERVICES_AND_EVENTS` | 12 | `1FxVbrREfXl75IIFqzPgB281fZLxlbwFc` |
+-| `04_FARMING_AND_AGRICULTURE` | 6 | `1HolfP7iMEOHqPRGP1a0tZCMvDLQsufmZ` |
+-| `05_ISLAMIC_AND_INSPIRATIONAL` | 12 | `1D6shG6r8eD7gD7J9EumpAa6pfjGt1XY2` |
+-| `06_MEMES_AND_VIDEO_THUMBNAILS` | 4 | `1ODirc-EQ-E0aSi7mrjZKaLsltPaKnRIN` |
+-| `07_SCREENSHOTS_AND_DOCUMENTS` | 8 | `1gEcFqzFiD-auDjGEXe38zr24F7V_SnBB` |
+-| `08_PROPERTY_VEHICLES_AND_SITE` | 9 | `1oOe59sf-Wm1YzVYzh745fMDWAPaOf-yc` |
+-| **Total** | **96** | |
+-
+-## What went where
+-
+-**01_PEOPLE_AND_DAILY_LIFE (22)** — portraits and lifestyle shots: people in suits,
+-children, a sleeping baby, food on the table (samp, pancakes), someone cooking in a pot,
+-a woman on a staircase, a boy at a racing game.
+-
+-**02_PRODUCTS_AND_PRICE_FLYERS (23)** — anything with a product and a price on it:
+-herbal balm and supplement ads, Bluetooth earbuds, resistance bands, car-seat gap
+-fillers, denim dungarees, boiler suit, ceramic mugs, solar freezer, gaming PC, server
+-rack diagram, crop buckets with sale numbers, Chalion tractor loader.
+-
+-**03_BUSINESS_SERVICES_AND_EVENTS (12)** — service adverts, event posters and
+-business graphics: Business Funding & Expansion, Graphic Design Agency, hiring poster,
+-Gaborone Business Launch, Re Ntse Reone, Messiah Forex, NEO Agency rates, Wired Poles
+-services, CEO exhibition stand, plus the Broad Creations logo (see note below).
+-
+-**04_FARMING_AND_AGRICULTURE (6)** — maize sheller, cabbage field and giant cabbage,
+-mango/avocado blossom, red rabbit varieties, rabbit urine fertiliser.
+-
+-**05_ISLAMIC_AND_INSPIRATIONAL (12)** — quote cards and verse cards: good-morning
+-cards, Setswana quotes, Isaiah and Deuteronomy verses, "Allah Listens", "Team Fajr".
+-
+-**06_MEMES_AND_VIDEO_THUMBNAILS (4)** — "Wired Poles" motivational meme, Lamine Yamal
+-meme, ChatGPT-made-$1M thumbnail, footballer action photo.
+-
+-**07_SCREENSHOTS_AND_DOCUMENTS (8)** — WhatsApp status screenshots, Facebook profile
+-screenshot, BERA fuel-price news graphics and policy pages, industrial 3D plant layout.
+-
+-**08_PROPERTY_VEHICLES_AND_SITE (9)** — Mustang convertible, airliner on the apron,
+-aircraft being serviced, house exterior, sliding gate with electric fence, bathroom
+-basin, two toilet photos, metal drain grating.
+-
+-## Notes
+-
+-- **Not duplicates, kept separate:** the car-seat gap filler appears twice with
+-  different prices (P50/P140 and a second variant), and the Bluetooth earbuds twice
+-  (P130/P230 and P150/P290). These are distinct price variants, so both were kept.
+-- **Flag, not deleted:** `Broad_Creations_Logo-01-removebg-preview.png` is a
+-  near-duplicate of the logo already sitting in the Broad Creations vendor folder.
+-  It is filed in `03_BUSINESS_SERVICES_AND_EVENTS`. Delete it only if you want the
+-  vendor copy to be the single original.
+-- No md5 duplicates were found across the 96 files — every file is distinct.
+-
+-Per-file detail (number, Drive id, folder, one-line description) is in
+-`_drive-work/0.images-sort-plan.tsv`.
+diff --git a/_drive-work/0.images-ids.tsv b/_drive-work/0.images-ids.tsv
+deleted file mode 100644
+index 7a1b753..0000000
+--- a/_drive-work/0.images-ids.tsv
++++ /dev/null
+@@ -1,97 +0,0 @@
+-# Drive file id	TAB	name — 0.IMAGES inventory, captured 2026-10-21
+-1hUReMoHmN1O8fQd8t-PAIMDq40QiMid6	0a27e459fec24cd1bda50c749d8bb23c.jpg
+-1OwnLCJCJvTcHoOqdrOMxgsA1UM98yneX	0b2bc3efbdf04683b2d07356621fa1ce.jpg
+-1gyiI01O80_Z70oZ0t5Bwd2aPJknJ99Y6	0c91f2475e9341289d11a89f7c8c564e.jpg
+-1uHJIUsHpN7g7h-GQNsp14aSCiTAqKw40	0c950a51cc9a40ddb2e7b69066774c17.jpg
+-1-9Q58vwCayEO1Xc74KmY2QZQdHOzbCS7	0dbacffd50454d358304bc76af2477b7.jpg
+-1SUFBjLPQvYIXuhQ85Z5-GRSgICBpbCdl	0f21e27eeba8424e97e34216d39c92c3.jpg
+-1Ww2RDOiPJlPGFOZrFfVF5KlKMkVtyh3N	1b609c3c484b447a98db414a00d1b793.jpg
+-1BMKPI8XjMduMtZmA_sfnVeK3B0hKuUw_	1ea0f961b574412e9c889b88956e6fb4.jpg
+-19_U6UkeFv8kq3aES79q_oeFI_nSr8p_4	2c6cc37b9ec04d66b47c5210fc81e275.jpg
+-1g2goHLS7L6cLBzzBYSISbX5QVO10v606	2c2887759e1c4561bdaabb887a311e3b.jpg
+-1OZjiwyZjo8sKCC4sJO4i_y3jBJyxAh1d	2fa538320d8141af95de0ae4fd2be4cb.jpg
+-19dpY19U7m8t5VyHUEhHHisXfWKte0lX7	3e90c02fc9e043979d41603bca99ba22.jpg
+-1gUx8eTDXBNm8Z4eCu6Wb4bshojPf5wCF	4a672e88e3074b308cc56be0b5999ac3.jpg
+-1jZL86RrpF8KCz0d0DISrw3zkgpuJcCZ5	4ba151721f1847aeb2a1d02585ff8bc5.jpg
+-1cfuoWyjrm_4gV_xUe8mVNIMVx9UmntSK	4ed95fc10f5749d7bc846855a38f68a5.jpg
+-1XCnnL3G3lDP_rkl2nbWgtKcbue7MLXHq	4f0cdf9641a9432c97706eac658ec8c5.jpg
+-1gBVLTKrQzOn8Kx9KVNyIJtiswrc5PKfG	4f622f47da5341ddbb19265bfa640cc8.jpg
+-11HaW1ja_fdCYk8RkP_Xqmiq0V04p2e_U	4fd6a3ddadb44f3c8f15bb740630d4e4.jpg
+-13djwUIJZldLnUcBrt5V9W6rBIti1ru3b	5a80fef96f764352b2cea1f9bbbef177.jpg
+-1VqaucolT6JThSl-ecVenyCsicVobrvGi	6d9b209f7df64a16a913e46c1a560f87.jpg
+-1__ioDyhxMVybLzNB3Do8j3VBz8UAE-rM	7dbe1da65d374500a2b67962e6158ba2.jpg
+-1zkz0Wcpkg5IyLTiKEPPOmSjG_g8g_4SN	8a7b47918eba447e87cca160fc9dd5b6.jpg
+-1zzc9LkLx3G03L3OmeNvOL3mGofuTWG6C	8bd50236b89444ad8570ec849fb70740.jpg
+-1fhDcWK0RcI6ddI3FbO2nhOtwN_9hZZFu	8e9ac7b7401145f285ed7586d38fe4c9.jpg
+-1hSzkxFG6g7SRgrHhI2yJQVOJomcNIn4J	8f6bc9940d364707bbc6153019fb9c2c.jpg
+-1Ki-v10rTWd-Bbn4Ayd94sJ61ITP2WkIO	8fbab30c4e08409dac3e5e2a2be1cc26.jpg
+-10e-p-EFUlONpm_1BE3Rqt6jLR_g7n4Ns	9c437604a9894a6aa28ccdc2c2e9e876.jpg
+-1CSjigV2T1nYXipuGemKjnQAPrmzUtRFG	16c135e36cdd4180a286ce651bc17752.jpg
+-1YisEln7ni2CXEII2TV82duje7TSgxVFd	29d8dc0d0233478e9d014b8ae6403b51.jpg
+-1b4Z3jN8An1bytqrzzzso3iCV1y8IhnOy	0031fa6db9ac483fa4945efab5751676.jpg
+-1d0AMJyKtVTWB08u2sDZ2ZTTGDB9hNBWt	32d50250aecf4ed991ea612a95aabe6b.jpg
+-19SX_YFYvhxsq_MgiWMWlWtw7TkSSXFFE	33e4cc6a2690487883a99bb4c73a8092.jpg
+-1LQjptRt8c3XMWiTTgIhIasyO1sYeYgR3	37d76078be0b4ba882e341651e49a118.jpg
+-1TKbRnIQbakviLcAw3tTNUer6iLoE_LLc	41f7792d18bd43c7ae0e09303adfa69b.jpg
+-1xQWtWSCnVUJ6r3FTKiyeqQUVOrt0lV4M	43ef0e1ff60e4c73bbf3d3fe5e708fc5.jpg
+-1AJ7Q35lfVLWzQifODD-nCgQOH62zNj3U	49a71b16c5c34f37992e208457956021.jpg
+-12qne8Pt6Z6oasPOXi1Y6-NuQoPnkBh3i	53a19702ebe94d84b3168d21bbb11c06.jpg
+-1eCXZAvBY3_B2zfDM-BjjCRrt4SSulxLh	056c4139d7384c53af7ce900ad0590fc.jpg
+-1PL74WE9jFBKXMpIiuKhELncUuFDfi2TA	58e70a29e33b47d280de43e752831c3e.jpg
+-17T6fanZJ02FwXmbUCDxg-53qoibeelNm	62c78a24cb6d43f88e5336d4e3df466c.jpg
+-1BWuoisUJSkK7dOblST3wrzf79NqL56oJ	69f33c6cd834447b8bca78852bc751a7.jpg
+-1Pc6bZ0948tZy3H_fgZyEf1t40J84C_dn	72a799fd98df4d42be53c7d732599a59.jpg
+-19ygSHIOrIX86uyPA8S7lTbfWTzpXJS9g	77b48669d54043f79fa82c729ef7478a.jpg
+-1LCR3BcrEnqi4jqueIVFKSruubRERI_hG	88b83236a8204f0f9ca2b3dfec2f7c2a.jpg
+-1G6GWL9N3pV--zXAuC0V_jK43dlT-F_GV	89b94bfb4a1246a5be1ac9b18c1c2625.jpg
+-1LLlwLn-1Pr50l8rJ1ln3mt7sTsOqmK_u	91c53219d5d64493b8a29feea775327e.jpg
+-1XtRIu_APGbtZcv6FruxPghZEMV9Nnhgw	91f136a79dd1470c996c03421e1efb5a.jpg
+-1kkMxc9Aax_DM-cT8ecl4VLU3ig4wOchA	97cdb0ff9ca143038a76e3abc9a60125.jpg
+-1ZPmu7QJUEoUw8SW-M9sxm_L0AoiW7nHf	137d34fc15444d39bf027d6dadcba92a.jpg
+-1OmqFcAiSOuUoPWHRCqdGSCbwmqFIQ11V	166a1e4356974ecdad01bf0c8262c976.jpg
+-1MDpYrCoZsDR8qtKXhHlrZ0x2hL8s7Z6A	201fe361d1714ec7b0892fbb6c387e30.jpg
+-15JAUmT-0Bt1EpsbeRl-n44y2NQwYK1TW	250c8849b8054d93b7c3ac318ca941a9.jpg
+-1o-3B9Swyx_PsbGzFY-D17Ror7lOGctqR	315bbf69825e4bc699073708c2cff0e2.jpg
+-1-RGr383-XO1RIeEYyT0THL5TI1bsMbIJ	478f7a849530473684fcbc8fde12b4db.jpg
+-1o_lcOCL8JblruRq3V5KDBJ9F7p5q74-Y	491be34aa5804078987ebb62bf437cac.jpg
+-1bUxp8d9nVyL6uEJEsvqB-Y44IzWzE-dY	694f595cdf7e4b9d9b7ec1bb4bc0d6d4.jpg
+-1zXiwRkqRI-5G1QFHLv6UQKcPFkQ4xbPN	827f134eafed4bf3b141cdbdf4039ec3.jpg
+-1E9BAGLMDP7mdvRKPGfcm7pMllTqO5XXK	966d3bd30d724d1589182d77055be592.jpg
+-1kHR9AFulPUQQfXT17eQzbHyspenz21tu	2758bb378ad84452adc1da05976766ff.jpg
+-12yEm_l5QhhszW51E61GwCtlS6gw15ex3	9821e303b7ff4685a1faa04d7a700d3d.jpg
+-1I6JYJLaHPCQ3s3jrQrQ9eRNMq55iF32T	23145ac900084f37aa194ba50de9dcbc.jpg
+-1cZs1XxFANXXdN3NrJ1clrRZ4EJugvtk-	32045c83027345f2b6c389864a06b06b.jpg
+-11PjMpE1dOsxWDsEgonpfqL7OA13ufy-T	34392b8e4f574102821ac44418cbfa57.jpg
+-1wia8Wgs_jihUZcfGxdeTm4WmZvZvT1Ls	39969c18586f4693a9ad411bdec07a14.jpg
+-1JvnF7YNFNYn8MnNDr-5igFZ9m2AENcZf	61371ee6572c4f5793c4fd024564d26c.jpg
+-1YZndJ0DP4JUlIU4BuMA550ienJPZ_vR7	84093e4f955a48939993a8d4b0b59a2b.jpg
+-1TThvLsQigplUpafE5NBWg9ipdNZMqvkz	0256894a3b5c47c182b177c44006c178.jpg
+-1qmr8OrbKrdr01XF7nMcLZMs97hXHj1mw	1474240206e841588e8ddb7d2080babc.jpg
+-1BDaHO0-foEDt_q3XvA9LaC3HtdIRnZCS	a2a59e722aff43ae90ff54df6e89cd98.jpg
+-1KEJxcSrEAW5oZSB9JIjwV3-1xNebc41N	a9ceaec04abb4ebc8229fd39de99e816.jpg
+-1H-Y1CIoWLS9WLU9D9brxsJUHHE6h5NFm	a60bd9e4854a48b986c065eb0ea17a45.jpg
+-1q6ST3Estjo1d2TSVy9J4cLykZhxbYsJn	aa185e7f31774219863e2fe88f6b4877.jpg
+-13qIhF0vFFi2-9hsER17_84HCqVgeuEc5	acf1ab16f2944c78bb722f004574a24f.jpg
+-1QwNqD-gNYKnpPZaG0sd0mYuIHQdRH-qW	acf6c7b77198466d886e4cd9ca3b8254.jpg
+-1iKfi8pQzMRFJEKQIrR1njRxa6roixrD5	b87a1543d67f4631bb4b3829e52a3e4a.jpg
+-1QBBNqud9gMhL7ca-925B4sOeDwOZc58b	b147cd8b71b640d1908241887d5dcff7.jpg
+-123NLjDnq3fq0Z7yIxgWTS4bgrFcmvbSW	b773ed161ad34a759636340c5a6410a4.jpg
+-12RHsuHHAkKSxBrGe8cMZQsg-Hc8st0BR	b004822bee7d4b5484602aa1784250e9.jpg
+-1kcoVIAM_vECO2cc6i5bozBMCoi8fUOiO	bdddcaa2ecfb4af7ac0e3677a58eeb32.jpg
+-1C_iqGlz7biZiFt2QfCYzw5YBtO6UH8xF	Broad_Creations_Logo-01-removebg-preview.png
+-1VmqxK-a6IY5l6UmC_MhKP6eK8hQuTqep	c4d44f21205c4bbebb6de43e10ac255c.jpg
+-1nQp_EkYYUwmI8_qRItwx7aKd37iuX8EX	c579c5d8dffc4dc8b08332fb5865917e.jpg
+-1mCx1mu8HbWu9D8D3dd0TWKA8PG6DlzUv	ca2e0b874d134ebb8025f577230d466d.jpg
+-14ZL_fmbOc1LA9SMENq_eAQOVwBs9N7V-	cd55943fae9542a58e066d099c47bbf6.jpg
+-1Ggxb2vNZmLeV-7aIEvbS7Q-00a6efnti	e4d0b963cea3462db496a421e2ce872e.jpg
+-1lf4hqYcd5VlAE8hj8heqJkPMnMvZE4q_	e19c5db6e473419d903463c8e86e592d.jpg
+-1nDyRaVqkxd5OWj9sJDrVU5iuMrjSOdtU	e58b628b918a43f8b98b50b0102c6ca8.jpg
+-1jFT4M1BkPT_kuhL3gI70OORUsyDPPDAc	f27ee2efea654b66bcfd23e7a0ed46dd.jpg
+-1Am1tMWkRuzIy60TZbaO1NUzbrhe-2Li5	f77545b9553141fe8e93ff7594a50912.jpg
+-1152EE9TQtxT1_xbMjD-EpTqhS_IwQZyQ	fa197b9df5b945ee8679a8057ab0eacd.jpg
+-1OvV14M4hh0QIcA_nOW2NfejwpX2XlNHF	fffb239e971e40d0991a2f7b87bd2806.jpg
+-1ZiKTmdxm9C9FbjQ4wOfI5SdU05_-M7Ki	HEKq7D9WkAAFNma.png
+-1IWy8apJ3ne8386VUk92hl1t2BJVo74ZJ	IMG-20260707-WA0003.jpg
+-1wweYYm_sNazdI5HfdQuTm3V9-YXN7ueB	IMG-20260707-WA0005.jpg
+-1olVULTsyi5-PjdSTxgnRp4-1-t0gl6KK	IMG-20260707-WA0006.jpg
+-1-oMPPF6xkMJNl50Ln-NYLwBiyKwcfpl4	Photo from Farouk Pandor
+diff --git a/_drive-work/0.images-sort-plan.tsv b/_drive-work/0.images-sort-plan.tsv
+deleted file mode 100644
+index 0524fb7..0000000
+--- a/_drive-work/0.images-sort-plan.tsv
++++ /dev/null
+@@ -1,109 +0,0 @@
+-# 0.IMAGES sort plan — 96 files, classified 2026-10-21
+-# Columns: index<TAB>drive_id<TAB>folder<TAB>description
+-# Verified: all 96 visual inspections done via contact sheets; md5 check shows 0 exact duplicates within 0.IMAGES.
+-001	1b4Z3jN8An1bytqrzzzso3iCV1y8IhnOy	01_PEOPLE_AND_DAILY_LIFE	Man in suit, seated portrait
+-002	1TThvLsQigplUpafE5NBWg9ipdNZMqvkz	01_PEOPLE_AND_DAILY_LIFE	Crowd at outdoor event
+-003	1eCXZAvBY3_B2zfDM-BjjCRrt4SSulxLh	02_PRODUCTS_AND_PRICE_FLYERS	"Start your day with Herbal Blend" product ad
+-004	1hUReMoHmN1O8fQd8t-PAIMDq40QiMid6	05_ISLAMIC_AND_INSPIRATIONAL	Good morning life-quote card
+-005	1OwnLCJCJvTcHoOqdrOMxgsA1UM98yneX	01_PEOPLE_AND_DAILY_LIFE	Bowl of cooked samp/beans
+-006	1gyiI01O80_Z70oZ0t5Bwd2aPJknJ99Y6	06_MEMES_AND_VIDEO_THUMBNAILS	"Wired Poles" motivational meme
+-007	1uHJIUsHpN7g7h-GQNsp14aSCiTAqKw40	05_ISLAMIC_AND_INSPIRATIONAL	"Value - too much availability kills your value"
+-008	1-9Q58vwCayEO1Xc74KmY2QZQdHOzbCS7	02_PRODUCTS_AND_PRICE_FLYERS	Car seat gap filler organiser (RBLShopping)
+-009	1SUFBjLPQvYIXuhQ85Z5-GRSgICBpbCdl	01_PEOPLE_AND_DAILY_LIFE	Woman in black dress on staircase
+-010	1ZPmu7QJUEoUw8SW-M9sxm_L0AoiW7nHf	02_PRODUCTS_AND_PRICE_FLYERS	New Zealand brand sachet product packs
+-011	1qmr8OrbKrdr01XF7nMcLZMs97hXHj1mw	02_PRODUCTS_AND_PRICE_FLYERS	Bluetooth earbuds "Cheaper for two" P130/P230
+-012	1OmqFcAiSOuUoPWHRCqdGSCbwmqFIQ11V	01_PEOPLE_AND_DAILY_LIFE	Uniformed officer portrait poster
+-013	1CSjigV2T1nYXipuGemKjnQAPrmzUtRFG	01_PEOPLE_AND_DAILY_LIFE	Man cooking in large pot, outdoor kitchen
+-014	1Ww2RDOiPJlPGFOZrFfVF5KlKMkVtyh3N	08_PROPERTY_VEHICLES_AND_SITE	Silver convertible Mustang
+-015	1BMKPI8XjMduMtZmA_sfnVeK3B0hKuUw_	01_PEOPLE_AND_DAILY_LIFE	Smiling girl in pink hoodie
+-016	1MDpYrCoZsDR8qtKXhHlrZ0x2hL8s7Z6A	02_PRODUCTS_AND_PRICE_FLYERS	"Focus Logic" herbal supplements ad
+-017	1I6JYJLaHPCQ3s3jrQrQ9eRNMq55iF32T	05_ISLAMIC_AND_INSPIRATIONAL	Kindness fable quote card
+-018	15JAUmT-0Bt1EpsbeRl-n44y2NQwYK1TW	05_ISLAMIC_AND_INSPIRATIONAL	Setswana quote "O santse o re wa edimola"
+-019	1kHR9AFulPUQQfXT17eQzbHyspenz21tu	01_PEOPLE_AND_DAILY_LIFE	Woman outdoors, hands together
+-020	1YisEln7ni2CXEII2TV82duje7TSgxVFd	08_PROPERTY_VEHICLES_AND_SITE	Metal drain grating (site photo)
+-021	1g2goHLS7L6cLBzzBYSISbX5QVO10v606	03_BUSINESS_SERVICES_AND_EVENTS	"Business Funding & Expansion" flyer (Vision Minds)
+-022	19_U6UkeFv8kq3aES79q_oeFI_nSr8p_4	03_BUSINESS_SERVICES_AND_EVENTS	Computer shop / gaming lounge interior
+-023	1OZjiwyZjo8sKCC4sJO4i_y3jBJyxAh1d	02_PRODUCTS_AND_PRICE_FLYERS	Blue denim dungarees product shot
+-024	1o-3B9Swyx_PsbGzFY-D17Ror7lOGctqR	02_PRODUCTS_AND_PRICE_FLYERS	RGB gaming PC setup
+-025	1cZs1XxFANXXdN3NrJ1clrRZ4EJugvtk-	08_PROPERTY_VEHICLES_AND_SITE	Bathroom basin photo
+-026	1d0AMJyKtVTWB08u2sDZ2ZTTGDB9hNBWt	02_PRODUCTS_AND_PRICE_FLYERS	Resistance band set "Cheaper for two" P50/P120
+-027	19SX_YFYvhxsq_MgiWMWlWtw7TkSSXFFE	01_PEOPLE_AND_DAILY_LIFE	Toddler standing portrait
+-028	11PjMpE1dOsxWDsEgonpfqL7OA13ufy-T	07_SCREENSHOTS_AND_DOCUMENTS	WhatsApp status screenshot (Arabic text)
+-029	1LQjptRt8c3XMWiTTgIhIasyO1sYeYgR3	01_PEOPLE_AND_DAILY_LIFE	Sleeping baby close-up
+-030	1wia8Wgs_jihUZcfGxdeTm4WmZvZvT1Ls	02_PRODUCTS_AND_PRICE_FLYERS	Server rack / UPS "Internal Structure" diagram
+-031	19dpY19U7m8t5VyHUEhHHisXfWKte0lX7	05_ISLAMIC_AND_INSPIRATIONAL	"The saddest Dua I have ever heard"
+-032	1TKbRnIQbakviLcAw3tTNUer6iLoE_LLc	03_BUSINESS_SERVICES_AND_EVENTS	"Graphic Design Agency" flyer (Vision Minds)
+-033	1xQWtWSCnVUJ6r3FTKiyeqQUVOrt0lV4M	02_PRODUCTS_AND_PRICE_FLYERS	Solar freezer / cooling unit (-20C to 55C)
+-034	1-RGr383-XO1RIeEYyT0THL5TI1bsMbIJ	02_PRODUCTS_AND_PRICE_FLYERS	"P200 chopping board with 2 trays"
+-035	1o_lcOCL8JblruRq3V5KDBJ9F7p5q74-Y	02_PRODUCTS_AND_PRICE_FLYERS	"3 Big Wonder" 500ml containers P168
+-036	1AJ7Q35lfVLWzQifODD-nCgQOH62zNj3U	02_PRODUCTS_AND_PRICE_FLYERS	Car seat gap filler organiser, price variant P50/P140
+-037	1gUx8eTDXBNm8Z4eCu6Wb4bshojPf5wCF	01_PEOPLE_AND_DAILY_LIFE	Boy in red t-shirt portrait
+-038	1jZL86RrpF8KCz0d0DISrw3zkgpuJcCZ5	07_SCREENSHOTS_AND_DOCUMENTS	WhatsApp status screenshot (dua, Arabic)
+-039	1cfuoWyjrm_4gV_xUe8mVNIMVx9UmntSK	05_ISLAMIC_AND_INSPIRATIONAL	"Priesthood Intelligence" poster
+-040	1XCnnL3G3lDP_rkl2nbWgtKcbue7MLXHq	08_PROPERTY_VEHICLES_AND_SITE	Aircraft being serviced on apron
+-041	1gBVLTKrQzOn8Kx9KVNyIJtiswrc5PKfG	07_SCREENSHOTS_AND_DOCUMENTS	Screenshot: BERA fuel price adjustment
+-042	11HaW1ja_fdCYk8RkP_Xqmiq0V04p2e_U	01_PEOPLE_AND_DAILY_LIFE	Boy playing racing video game
+-043	12qne8Pt6Z6oasPOXi1Y6-NuQoPnkBh3i	03_BUSINESS_SERVICES_AND_EVENTS	"Re Ntse Reone" event poster 05 Sep 2026
+-044	1PL74WE9jFBKXMpIiuKhELncUuFDfi2TA	01_PEOPLE_AND_DAILY_LIFE	Woman seated on steps, portrait
+-045	13djwUIJZldLnUcBrt5V9W6rBIti1ru3b	03_BUSINESS_SERVICES_AND_EVENTS	"Gaborone Business Launch" poster 11 Jul 2026
+-046	1JvnF7YNFNYn8MnNDr-5igFZ9m2AENcZf	05_ISLAMIC_AND_INSPIRATIONAL	Good morning + Sheikh Shuraim quote
+-047	17T6fanZJ02FwXmbUCDxg-53qoibeelNm	01_PEOPLE_AND_DAILY_LIFE	Woman with balloons in shop
+-048	1bUxp8d9nVyL6uEJEsvqB-Y44IzWzE-dY	05_ISLAMIC_AND_INSPIRATIONAL	Deuteronomy 31:8 verse card
+-049	1BWuoisUJSkK7dOblST3wrzf79NqL56oJ	07_SCREENSHOTS_AND_DOCUMENTS	Document page (BERA policy)
+-050	1VqaucolT6JThSl-ecVenyCsicVobrvGi	06_MEMES_AND_VIDEO_THUMBNAILS	"Lamine Yamal is nowhere to be seen" meme
+-051	1Pc6bZ0948tZy3H_fgZyEf1t40J84C_dn	01_PEOPLE_AND_DAILY_LIFE	Man leaning on car, portrait
+-052	19ygSHIOrIX86uyPA8S7lTbfWTzpXJS9g	04_FARMING_AND_AGRICULTURE	Multifunction maize sheller/thresher machine
+-053	1__ioDyhxMVybLzNB3Do8j3VBz8UAE-rM	07_SCREENSHOTS_AND_DOCUMENTS	Industrial 3D plant layout diagram
+-054	1zXiwRkqRI-5G1QFHLv6UQKcPFkQ4xbPN	05_ISLAMIC_AND_INSPIRATIONAL	Isaiah 60:22 verse card
+-055	1YZndJ0DP4JUlIU4BuMA550ienJPZ_vR7	01_PEOPLE_AND_DAILY_LIFE	Man seated outdoors with dog
+-056	1LCR3BcrEnqi4jqueIVFKSruubRERI_hG	02_PRODUCTS_AND_PRICE_FLYERS	"NEO Agency Rates" deposit price poster
+-057	1G6GWL9N3pV--zXAuC0V_jK43dlT-F_GV	01_PEOPLE_AND_DAILY_LIFE	Woman on staircase, fashion shot
+-058	1zkz0Wcpkg5IyLTiKEPPOmSjG_g8g_4SN	03_BUSINESS_SERVICES_AND_EVENTS	"CEO" exhibition banner / stand
+-059	1zzc9LkLx3G03L3OmeNvOL3mGofuTWG6C	02_PRODUCTS_AND_PRICE_FLYERS	Stack of white ceramic mugs
+-060	1fhDcWK0RcI6ddI3FbO2nhOtwN_9hZZFu	03_BUSINESS_SERVICES_AND_EVENTS	"We are hiring" recruitment poster
+-061	1hSzkxFG6g7SRgrHhI2yJQVOJomcNIn4J	02_PRODUCTS_AND_PRICE_FLYERS	"Colds and Flu" winter herbal balm ad
+-062	1Ki-v10rTWd-Bbn4Ayd94sJ61ITP2WkIO	01_PEOPLE_AND_DAILY_LIFE	Plate of pancakes, bacon and eggs
+-063	1LLlwLn-1Pr50l8rJ1ln3mt7sTsOqmK_u	01_PEOPLE_AND_DAILY_LIFE	Girl seated, thoughtful
+-064	1XtRIu_APGbtZcv6FruxPghZEMV9Nnhgw	03_BUSINESS_SERVICES_AND_EVENTS	"Messiah Forex Account Management" ad
+-065	1E9BAGLMDP7mdvRKPGfcm7pMllTqO5XXK	05_ISLAMIC_AND_INSPIRATIONAL	Gold quote card (blurred text)
+-066	1kkMxc9Aax_DM-cT8ecl4VLU3ig4wOchA	05_ISLAMIC_AND_INSPIRATIONAL	"Team Fajr" Umar ibn Abdul Aziz quote
+-067	12yEm_l5QhhszW51E61GwCtlS6gw15ex3	02_PRODUCTS_AND_PRICE_FLYERS	Red boiler suit / overalls product
+-068	10e-p-EFUlONpm_1BE3Rqt6jLR_g7n4Ns	01_PEOPLE_AND_DAILY_LIFE	Child at tiled wall with tap
+-069	1C_iqGlz7biZiFt2QfCYzw5YBtO6UH8xF	03_BUSINESS_SERVICES_AND_EVENTS	Broad Creations logo (see duplicate note)
+-070	1ZiKTmdxm9C9FbjQ4wOfI5SdU05_-M7Ki	03_BUSINESS_SERVICES_AND_EVENTS	"How to identify a trend" trading infographic
+-071	1IWy8apJ3ne8386VUk92hl1t2BJVo74ZJ	04_FARMING_AND_AGRICULTURE	Man holding giant cabbage in field
+-072	1wweYYm_sNazdI5HfdQuTm3V9-YXN7ueB	04_FARMING_AND_AGRICULTURE	Cabbage field at sunset
+-073	1olVULTsyi5-PjdSTxgnRp4-1-t0gl6KK	06_MEMES_AND_VIDEO_THUMBNAILS	"ChatGPT made him $1M" video thumbnail
+-074	1-oMPPF6xkMJNl50Ln-NYLwBiyKwcfpl4	04_FARMING_AND_AGRICULTURE	Mango/avocado flower panicle (blossom)
+-075	1BDaHO0-foEDt_q3XvA9LaC3HtdIRnZCS	08_PROPERTY_VEHICLES_AND_SITE	Toilet photo A
+-076	1H-Y1CIoWLS9WLU9D9brxsJUHHE6h5NFm	08_PROPERTY_VEHICLES_AND_SITE	Sliding gate with electric fence
+-077	1KEJxcSrEAW5oZSB9JIjwV3-1xNebc41N	02_PRODUCTS_AND_PRICE_FLYERS	Chalion tractor loader, factory price
+-078	1q6ST3Estjo1d2TSVy9J4cLykZhxbYsJn	08_PROPERTY_VEHICLES_AND_SITE	Airliner on apron (TAAG livery)
+-079	13qIhF0vFFi2-9hsER17_84HCqVgeuEc5	02_PRODUCTS_AND_PRICE_FLYERS	Herbal Balm "ancient herbal way" poster
+-080	1QwNqD-gNYKnpPZaG0sd0mYuIHQdRH-qW	08_PROPERTY_VEHICLES_AND_SITE	Modern house exterior
+-081	12RHsuHHAkKSxBrGe8cMZQsg-Hc8st0BR	01_PEOPLE_AND_DAILY_LIFE	Woman portrait, animal-print top
+-082	1QBBNqud9gMhL7ca-925B4sOeDwOZc58b	02_PRODUCTS_AND_PRICE_FLYERS	Blue patterned shirt product shot
+-083	123NLjDnq3fq0Z7yIxgWTS4bgrFcmvbSW	07_SCREENSHOTS_AND_DOCUMENTS	Document page (policy text, BERA)
+-084	1iKfi8pQzMRFJEKQIrR1njRxa6roixrD5	08_PROPERTY_VEHICLES_AND_SITE	Toilet photo B
+-085	1kcoVIAM_vECO2cc6i5bozBMCoi8fUOiO	07_SCREENSHOTS_AND_DOCUMENTS	News graphic: fuel prices drop from midnight
+-086	1VmqxK-a6IY5l6UmC_MhKP6eK8hQuTqep	07_SCREENSHOTS_AND_DOCUMENTS	Facebook profile screenshot
+-087	1nQp_EkYYUwmI8_qRItwx7aKd37iuX8EX	02_PRODUCTS_AND_PRICE_FLYERS	Tomato/onion buckets with sale phone numbers
+-088	1mCx1mu8HbWu9D8D3dd0TWKA8PG6DlzUv	03_BUSINESS_SERVICES_AND_EVENTS	Wired Poles services poster (fence, CCTV, gates)
+-089	14ZL_fmbOc1LA9SMENq_eAQOVwBs9N7V-	02_PRODUCTS_AND_PRICE_FLYERS	Tupperware product page screenshot
+-090	1lf4hqYcd5VlAE8hj8heqJkPMnMvZE4q_	01_PEOPLE_AND_DAILY_LIFE	Woman in black dress in mall
+-091	1Ggxb2vNZmLeV-7aIEvbS7Q-00a6efnti	03_BUSINESS_SERVICES_AND_EVENTS	"Weekend" promotional stand in mall
+-092	1nDyRaVqkxd5OWj9sJDrVU5iuMrjSOdtU	02_PRODUCTS_AND_PRICE_FLYERS	Bluetooth earbuds, price variant P150/P290
+-093	1jFT4M1BkPT_kuhL3gI70OORUsyDPPDAc	04_FARMING_AND_AGRICULTURE	"Discover Red Rabbit Varieties" poster
+-094	1Am1tMWkRuzIy60TZbaO1NUzbrhe-2Li5	05_ISLAMIC_AND_INSPIRATIONAL	"Allah Listens" card
+-095	1152EE9TQtxT1_xbMjD-EpTqhS_IwQZyQ	04_FARMING_AND_AGRICULTURE	Organic rabbit urine fertiliser for sale
+-096	1OvV14M4hh0QIcA_nOW2NfejwpX2XlNHF	06_MEMES_AND_VIDEO_THUMBNAILS	Footballer action photo
+-
+-# Created folders (2026-10-21), all parented by 0.IMAGES (1hlsGyacmnaLXUgh4Pq5Yk73RhugFVp2i)
+-# 01_PEOPLE_AND_DAILY_LIFE	1Y1Zy5d31N8ckGVEKQYLt824Zo31KTXJb
+-# 02_PRODUCTS_AND_PRICE_FLYERS	1sJVu3v3e2rzVrux2TXPAt_yJ-M-YEOie
+-# 03_BUSINESS_SERVICES_AND_EVENTS	1FxVbrREfXl75IIFqzPgB281fZLxlbwFc
+-# 04_FARMING_AND_AGRICULTURE	1HolfP7iMEOHqPRGP1a0tZCMvDLQsufmZ
+-# 05_ISLAMIC_AND_INSPIRATIONAL	1D6shG6r8eD7gD7J9EumpAa6pfjGt1XY2
+-# 06_MEMES_AND_VIDEO_THUMBNAILS	1ODirc-EQ-E0aSi7mrjZKaLsltPaKnRIN
+-# 07_SCREENSHOTS_AND_DOCUMENTS	1gEcFqzFiD-auDjGEXe38zr24F7V_SnBB
+-# 08_PROPERTY_VEHICLES_AND_SITE	1oOe59sf-Wm1YzVYzh745fMDWAPaOf-yc
+diff --git a/_drive-work/ids.tsv b/_drive-work/ids.tsv
+deleted file mode 100644
+index 85f2706..0000000
+--- a/_drive-work/ids.tsv
++++ /dev/null
+@@ -1,96 +0,0 @@
+-1hUReMoHmN1O8fQd8t-PAIMDq40QiMid6	0a27e459fec24cd1bda50c749d8bb23c.jpg
+-1OwnLCJCJvTcHoOqdrOMxgsA1UM98yneX	0b2bc3efbdf04683b2d07356621fa1ce.jpg
+-1gyiI01O80_Z70oZ0t5Bwd2aPJknJ99Y6	0c91f2475e9341289d11a89f7c8c564e.jpg
+-1uHJIUsHpN7g7h-GQNsp14aSCiTAqKw40	0c950a51cc9a40ddb2e7b69066774c17.jpg
+-1-9Q58vwCayEO1Xc74KmY2QZQdHOzbCS7	0dbacffd50454d358304bc76af2477b7.jpg
+-1SUFBjLPQvYIXuhQ85Z5-GRSgICBpbCdl	0f21e27eeba8424e97e34216d39c92c3.jpg
+-1Ww2RDOiPJlPGFOZrFfVF5KlKMkVtyh3N	1b609c3c484b447a98db414a00d1b793.jpg
+-1BMKPI8XjMduMtZmA_sfnVeK3B0hKuUw_	1ea0f961b574412e9c889b88956e6fb4.jpg
+-19_U6UkeFv8kq3aES79q_oeFI_nSr8p_4	2c6cc37b9ec04d66b47c5210fc81e275.jpg
+-1g2goHLS7L6cLBzzBYSISbX5QVO10v606	2c2887759e1c4561bdaabb887a311e3b.jpg
+-1OZjiwyZjo8sKCC4sJO4i_y3jBJyxAh1d	2fa538320d8141af95de0ae4fd2be4cb.jpg
+-19dpY19U7m8t5VyHUEhHHisXfWKte0lX7	3e90c02fc9e043979d41603bca99ba22.jpg
+-1gUx8eTDXBNm8Z4eCu6Wb4bshojPf5wCF	4a672e88e3074b308cc56be0b5999ac3.jpg
+-1jZL86RrpF8KCz0d0DISrw3zkgpuJcCZ5	4ba151721f1847aeb2a1d02585ff8bc5.jpg
+-1cfuoWyjrm_4gV_xUe8mVNIMVx9UmntSK	4ed95fc10f5749d7bc846855a38f68a5.jpg
+-1XCnnL3G3lDP_rkl2nbWgtKcbue7MLXHq	4f0cdf9641a9432c97706eac658ec8c5.jpg
+-1gBVLTKrQzOn8Kx9KVNyIJtiswrc5PKfG	4f622f47da5341ddbb19265bfa640cc8.jpg
+-11HaW1ja_fdCYk8RkP_Xqmiq0V04p2e_U	4fd6a3ddadb44f3c8f15bb740630d4e4.jpg
+-13djwUIJZldLnUcBrt5V9W6rBIti1ru3b	5a80fef96f764352b2cea1f9bbbef177.jpg
+-1VqaucolT6JThSl-ecVenyCsicVobrvGi	6d9b209f7df64a16a913e46c1a560f87.jpg
+-1__ioDyhxMVybLzNB3Do8j3VBz8UAE-rM	7dbe1da65d374500a2b67962e6158ba2.jpg
+-1zkz0Wcpkg5IyLTiKEPPOmSjG_g8g_4SN	8a7b47918eba447e87cca160fc9dd5b6.jpg
+-1zzc9LkLx3G03L3OmeNvOL3mGofuTWG6C	8bd50236b89444ad8570ec849fb70740.jpg
+-1fhDcWK0RcI6ddI3FbO2nhOtwN_9hZZFu	8e9ac7b7401145f285ed7586d38fe4c9.jpg
+-1hSzkxFG6g7SRgrHhI2yJQVOJomcNIn4J	8f6bc9940d364707bbc6153019fb9c2c.jpg
+-1Ki-v10rTWd-Bbn4Ayd94sJ61ITP2WkIO	8fbab30c4e08409dac3e5e2a2be1cc26.jpg
+-10e-p-EFUlONpm_1BE3Rqt6jLR_g7n4Ns	9c437604a9894a6aa28ccdc2c2e9e876.jpg
+-1CSjigV2T1nYXipuGemKjnQAPrmzUtRFG	16c135e36cdd4180a286ce651bc17752.jpg
+-1YisEln7ni2CXEII2TV82duje7TSgxVFd	29d8dc0d0233478e9d014b8ae6403b51.jpg
+-1b4Z3jN8An1bytqrzzzso3iCV1y8IhnOy	0031fa6db9ac483fa4945efab5751676.jpg
+-1d0AMJyKtVTWB08u2sDZ2ZTTGDB9hNBWt	32d50250aecf4ed991ea612a95aabe6b.jpg
+-19SX_YFYvhxsq_MgiWMWlWtw7TkSSXFFE	33e4cc6a2690487883a99bb4c73a8092.jpg
+-1LQjptRt8c3XMWiTTgIhIasyO1sYeYgR3	37d76078be0b4ba882e341651e49a118.jpg
+-1TKbRnIQbakviLcAw3tTNUer6iLoE_LLc	41f7792d18bd43c7ae0e09303adfa69b.jpg
+-1xQWtWSCnVUJ6r3FTKiyeqQUVOrt0lV4M	43ef0e1ff60e4c73bbf3d3fe5e708fc5.jpg
+-1AJ7Q35lfVLWzQifODD-nCgQOH62zNj3U	49a71b16c5c34f37992e208457956021.jpg
+-12qne8Pt6Z6oasPOXi1Y6-NuQoPnkBh3i	53a19702ebe94d84b3168d21bbb11c06.jpg
+-1eCXZAvBY3_B2zfDM-BjjCRrt4SSulxLh	056c4139d7384c53af7ce900ad0590fc.jpg
+-1PL74WE9jFBKXMpIiuKhELncUuFDfi2TA	58e70a29e33b47d280de43e752831c3e.jpg
+-17T6fanZJ02FwXmbUCDxg-53qoibeelNm	62c78a24cb6d43f88e5336d4e3df466c.jpg
+-1BWuoisUJSkK7dOblST3wrzf79NqL56oJ	69f33c6cd834447b8bca78852bc751a7.jpg
+-1Pc6bZ0948tZy3H_fgZyEf1t40J84C_dn	72a799fd98df4d42be53c7d732599a59.jpg
+-19ygSHIOrIX86uyPA8S7lTbfWTzpXJS9g	77b48669d54043f79fa82c729ef7478a.jpg
+-1LCR3BcrEnqi4jqueIVFKSruubRERI_hG	88b83236a8204f0f9ca2b3dfec2f7c2a.jpg
+-1G6GWL9N3pV--zXAuC0V_jK43dlT-F_GV	89b94bfb4a1246a5be1ac9b18c1c2625.jpg
+-1LLlwLn-1Pr50l8rJ1ln3mt7sTsOqmK_u	91c53219d5d64493b8a29feea775327e.jpg
+-1XtRIu_APGbtZcv6FruxPghZEMV9Nnhgw	91f136a79dd1470c996c03421e1efb5a.jpg
+-1kkMxc9Aax_DM-cT8ecl4VLU3ig4wOchA	97cdb0ff9ca143038a76e3abc9a60125.jpg
+-1ZPmu7QJUEoUw8SW-M9sxm_L0AoiW7nHf	137d34fc15444d39bf027d6dadcba92a.jpg
+-1OmqFcAiSOuUoPWHRCqdGSCbwmqFIQ11V	166a1e4356974ecdad01bf0c8262c976.jpg
+-1MDpYrCoZsDR8qtKXhHlrZ0x2hL8s7Z6A	201fe361d1714ec7b0892fbb6c387e30.jpg
+-15JAUmT-0Bt1EpsbeRl-n44y2NQwYK1TW	250c8849b8054d93b7c3ac318ca941a9.jpg
+-1o-3B9Swyx_PsbGzFY-D17Ror7lOGctqR	315bbf69825e4bc699073708c2cff0e2.jpg
+-1-RGr383-XO1RIeEYyT0THL5TI1bsMbIJ	478f7a849530473684fcbc8fde12b4db.jpg
+-1o_lcOCL8JblruRq3V5KDBJ9F7p5q74-Y	491be34aa5804078987ebb62bf437cac.jpg
+-1bUxp8d9nVyL6uEJEsvqB-Y44IzWzE-dY	694f595cdf7e4b9d9b7ec1bb4bc0d6d4.jpg
+-1zXiwRkqRI-5G1QFHLv6UQKcPFkQ4xbPN	827f134eafed4bf3b141cdbdf4039ec3.jpg
+-1E9BAGLMDP7mdvRKPGfcm7pMllTqO5XXK	966d3bd30d724d1589182d77055be592.jpg
+-1kHR9AFulPUQQfXT17eQzbHyspenz21tu	2758bb378ad84452adc1da05976766ff.jpg
+-12yEm_l5QhhszW51E61GwCtlS6gw15ex3	9821e303b7ff4685a1faa04d7a700d3d.jpg
+-1I6JYJLaHPCQ3s3jrQrQ9eRNMq55iF32T	23145ac900084f37aa194ba50de9dcbc.jpg
+-1cZs1XxFANXXdN3NrJ1clrRZ4EJugvtk-	32045c83027345f2b6c389864a06b06b.jpg
+-11PjMpE1dOsxWDsEgonpfqL7OA13ufy-T	34392b8e4f574102821ac44418cbfa57.jpg
+-1wia8Wgs_jihUZcfGxdeTm4WmZvZvT1Ls	39969c18586f4693a9ad411bdec07a14.jpg
+-1JvnF7YNFNYn8MnNDr-5igFZ9m2AENcZf	61371ee6572c4f5793c4fd024564d26c.jpg
+-1YZndJ0DP4JUlIU4BuMA550ienJPZ_vR7	84093e4f955a48939993a8d4b0b59a2b.jpg
+-1TThvLsQigplUpafE5NBWg9ipdNZMqvkz	0256894a3b5c47c182b177c44006c178.jpg
+-1qmr8OrbKrdr01XF7nMcLZMs97hXHj1mw	1474240206e841588e8ddb7d2080babc.jpg
+-1BDaHO0-foEDt_q3XvA9LaC3HtdIRnZCS	a2a59e722aff43ae90ff54df6e89cd98.jpg
+-1KEJxcSrEAW5oZSB9JIjwV3-1xNebc41N	a9ceaec04abb4ebc8229fd39de99e816.jpg
+-1H-Y1CIoWLS9WLU9D9brxsJUHHE6h5NFm	a60bd9e4854a48b986c065eb0ea17a45.jpg
+-1q6ST3Estjo1d2TSVy9J4cLykZhxbYsJn	aa185e7f31774219863e2fe88f6b4877.jpg
+-13qIhF0vFFi2-9hsER17_84HCqVgeuEc5	acf1ab16f2944c78bb722f004574a24f.jpg
+-1QwNqD-gNYKnpPZaG0sd0mYuIHQdRH-qW	acf6c7b77198466d886e4cd9ca3b8254.jpg
+-1iKfi8pQzMRFJEKQIrR1njRxa6roixrD5	b87a1543d67f4631bb4b3829e52a3e4a.jpg
+-1QBBNqud9gMhL7ca-925B4sOeDwOZc58b	b147cd8b71b640d1908241887d5dcff7.jpg
+-123NLjDnq3fq0Z7yIxgWTS4bgrFcmvbSW	b773ed161ad34a759636340c5a6410a4.jpg
+-12RHsuHHAkKSxBrGe8cMZQsg-Hc8st0BR	b004822bee7d4b5484602aa1784250e9.jpg
+-1kcoVIAM_vECO2cc6i5bozBMCoi8fUOiO	bdddcaa2ecfb4af7ac0e3677a58eeb32.jpg
+-1C_iqGlz7biZiFt2QfCYzw5YBtO6UH8xF	Broad_Creations_Logo-01-removebg-preview.png
+-1VmqxK-a6IY5l6UmC_MhKP6eK8hQuTqep	c4d44f21205c4bbebb6de43e10ac255c.jpg
+-1nQp_EkYYUwmI8_qRItwx7aKd37iuX8EX	c579c5d8dffc4dc8b08332fb5865917e.jpg
+-1mCx1mu8HbWu9D8D3dd0TWKA8PG6DlzUv	ca2e0b874d134ebb8025f577230d466d.jpg
+-14ZL_fmbOc1LA9SMENq_eAQOVwBs9N7V-	cd55943fae9542a58e066d099c47bbf6.jpg
+-1Ggxb2vNZmLeV-7aIEvbS7Q-00a6efnti	e4d0b963cea3462db496a421e2ce872e.jpg
+-1lf4hqYcd5VlAE8hj8heqJkPMnMvZE4q_	e19c5db6e473419d903463c8e86e592d.jpg
+-1nDyRaVqkxd5OWj9sJDrVU5iuMrjSOdtU	e58b628b918a43f8b98b50b0102c6ca8.jpg
+-1jFT4M1BkPT_kuhL3gI70OORUsyDPPDAc	f27ee2efea654b66bcfd23e7a0ed46dd.jpg
+-1Am1tMWkRuzIy60TZbaO1NUzbrhe-2Li5	f77545b9553141fe8e93ff7594a50912.jpg
+-1152EE9TQtxT1_xbMjD-EpTqhS_IwQZyQ	fa197b9df5b945ee8679a8057ab0eacd.jpg
+-1OvV14M4hh0QIcA_nOW2NfejwpX2XlNHF	fffb239e971e40d0991a2f7b87bd2806.jpg
+-1ZiKTmdxm9C9FbjQ4wOfI5SdU05_-M7Ki	HEKq7D9WkAAFNma.png
+-1IWy8apJ3ne8386VUk92hl1t2BJVo74ZJ	IMG-20260707-WA0003.jpg
+-1wweYYm_sNazdI5HfdQuTm3V9-YXN7ueB	IMG-20260707-WA0005.jpg
+-1olVULTsyi5-PjdSTxgnRp4-1-t0gl6KK	IMG-20260707-WA0006.jpg
+-1-oMPPF6xkMJNl50Ln-NYLwBiyKwcfpl4	Photo from Farouk Pandor
+diff --git a/_drive-work/md5.tsv b/_drive-work/md5.tsv
+deleted file mode 100644
+index 610ecc9..0000000
+--- a/_drive-work/md5.tsv
++++ /dev/null
+@@ -1,96 +0,0 @@
+-96f7040413e505039b54ad79fe534066	001	0031fa6db9ac483fa4945efab5751676.jpg
+-d50a6914007c2e3e4fdcec4df13659c8	002	0256894a3b5c47c182b177c44006c178.jpg
+-52ad47dcc56bd933ebc142d749ead789	003	056c4139d7384c53af7ce900ad0590fc.jpg
+-a798dfe29801745fb9e6d81fbd11c48b	004	0a27e459fec24cd1bda50c749d8bb23c.jpg
+-f05344a91ffb45dff18f2fc19ba380f2	005	0b2bc3efbdf04683b2d07356621fa1ce.jpg
+-4c5f70ba38cb1f912eec652f3181ddb8	006	0c91f2475e9341289d11a89f7c8c564e.jpg
+-2f275399541d9b6b4684ac02c7c7f976	007	0c950a51cc9a40ddb2e7b69066774c17.jpg
+-aac6ad657c0cd5ab3804a3ba253fdad8	008	0dbacffd50454d358304bc76af2477b7.jpg
+-a2fe2c98c555a60f4aea64e6a9bcdd8c	009	0f21e27eeba8424e97e34216d39c92c3.jpg
+-dab7dc7a24bd44cb1f3a66d0aa8cc603	010	137d34fc15444d39bf027d6dadcba92a.jpg
+-1274b232c084a1a5dc9162235269949c	011	1474240206e841588e8ddb7d2080babc.jpg
+-2af9f567470effb97f7e3656bf329316	012	166a1e4356974ecdad01bf0c8262c976.jpg
+-fff6c337f23160bfa0debd4677cd0cb3	013	16c135e36cdd4180a286ce651bc17752.jpg
+-740728ce7ae04a218cc8573c2f9041a3	014	1b609c3c484b447a98db414a00d1b793.jpg
+-74793b741613ac92679812cea530a4a7	015	1ea0f961b574412e9c889b88956e6fb4.jpg
+-722c589ee7400caaedd3e1dd5c97aa54	016	201fe361d1714ec7b0892fbb6c387e30.jpg
+-1c26627dadfb30a2c63c944ed59ebdd9	017	23145ac900084f37aa194ba50de9dcbc.jpg
+-dcc94003dbeacc50bf28837e9e2a80ac	018	250c8849b8054d93b7c3ac318ca941a9.jpg
+-c42aa1ecc3eea30762bf64afcaa0619b	019	2758bb378ad84452adc1da05976766ff.jpg
+-f7ce5767a8ad1d173eb8b5d48e829874	020	29d8dc0d0233478e9d014b8ae6403b51.jpg
+-71ea0b89b5742c07c26e872a2975daf4	021	2c2887759e1c4561bdaabb887a311e3b.jpg
+-8c04aadf50b58a8877cdd6bb13225a46	022	2c6cc37b9ec04d66b47c5210fc81e275.jpg
+-478a6dfe2b0b66dae55d5c58405b20f4	023	2fa538320d8141af95de0ae4fd2be4cb.jpg
+-77c0a3ae38e6a1d2a429ddd37fdecfe4	024	315bbf69825e4bc699073708c2cff0e2.jpg
+-6fcb5c88bf068bc6c2e535285f69ecc6	025	32045c83027345f2b6c389864a06b06b.jpg
+-a459494f072647f4c17ede903d24afdb	026	32d50250aecf4ed991ea612a95aabe6b.jpg
+-1e5697b3b794c2f0ce0b75d40c8a2a8e	027	33e4cc6a2690487883a99bb4c73a8092.jpg
+-d4145ef57b3335433cf102c36d65d3d9	028	34392b8e4f574102821ac44418cbfa57.jpg
+-3f9f97129835203d08baa077c38a0a67	029	37d76078be0b4ba882e341651e49a118.jpg
+-42694ec3f8a67f0862b7b6d0587d4978	030	39969c18586f4693a9ad411bdec07a14.jpg
+-fd5c06611a9a26d9ad56579cf6df7053	031	3e90c02fc9e043979d41603bca99ba22.jpg
+-d3f1d60a96788197a5327df6bbf14cbc	032	41f7792d18bd43c7ae0e09303adfa69b.jpg
+-4021f834532ebdbe38618e4f03cf0493	033	43ef0e1ff60e4c73bbf3d3fe5e708fc5.jpg
+-15f17cf175b33ac788c731db843e7c21	034	478f7a849530473684fcbc8fde12b4db.jpg
+-20c17a2ff372f8f96538735b85fcbb55	035	491be34aa5804078987ebb62bf437cac.jpg
+-116c761970597cba5132628ed690e4d6	036	49a71b16c5c34f37992e208457956021.jpg
+-e0d8040f2f879c7012c8e42a13a8d5fc	037	4a672e88e3074b308cc56be0b5999ac3.jpg
+-41ddb5affcc0b517b0d99c07cd73b16c	038	4ba151721f1847aeb2a1d02585ff8bc5.jpg
+-c7adc4e90ab93ff5df4a1f2b80c95f72	039	4ed95fc10f5749d7bc846855a38f68a5.jpg
+-82981d9347c753cc2ece775d6d0b1c24	040	4f0cdf9641a9432c97706eac658ec8c5.jpg
+-d8e1f1cdc5e4174e1d49962b82478620	041	4f622f47da5341ddbb19265bfa640cc8.jpg
+-8f9ca8cc73922856d2c3d374948868e9	042	4fd6a3ddadb44f3c8f15bb740630d4e4.jpg
+-3bea2f4dc674d32b298ca36d5d19a289	043	53a19702ebe94d84b3168d21bbb11c06.jpg
+-054d650905351faf98074c62134e652b	044	58e70a29e33b47d280de43e752831c3e.jpg
+-5b211a21469e3be49af4366fb9e34db1	045	5a80fef96f764352b2cea1f9bbbef177.jpg
+-38b334d52bb4aa62618ea92afe0062e5	046	61371ee6572c4f5793c4fd024564d26c.jpg
+-8508b91567c19fefe5141ba16c971b1c	047	62c78a24cb6d43f88e5336d4e3df466c.jpg
+-66c0946d38d8007ff48e198254a72de3	048	694f595cdf7e4b9d9b7ec1bb4bc0d6d4.jpg
+-c299e3deb0d4649cd73f926228953dbb	049	69f33c6cd834447b8bca78852bc751a7.jpg
+-6aad7775174de8ed527ef55af0411a64	050	6d9b209f7df64a16a913e46c1a560f87.jpg
+-e8154cdc4372e0660ba73690cf663d1d	051	72a799fd98df4d42be53c7d732599a59.jpg
+-7b79e7c887a1fd8f17a095bc26132212	052	77b48669d54043f79fa82c729ef7478a.jpg
+-9d52719d545a3d09c008c329197716d0	053	7dbe1da65d374500a2b67962e6158ba2.jpg
+-85bfd5f8407cd2faa1ec43fd5835d512	054	827f134eafed4bf3b141cdbdf4039ec3.jpg
+-2bff91ad0a4cd2103c533d424eef93e6	055	84093e4f955a48939993a8d4b0b59a2b.jpg
+-44a5416e17256ceb2a2fab0d409be543	056	88b83236a8204f0f9ca2b3dfec2f7c2a.jpg
+-60f5f0b98c86a46f1cf864bd2b90c238	057	89b94bfb4a1246a5be1ac9b18c1c2625.jpg
+-332161bd1ee32c7ce136ba56255acb04	058	8a7b47918eba447e87cca160fc9dd5b6.jpg
+-f80bd9ef8d855627362aeefd6677f660	059	8bd50236b89444ad8570ec849fb70740.jpg
+-a0ab60367953f6c7c12caf900f2f6deb	060	8e9ac7b7401145f285ed7586d38fe4c9.jpg
+-93da0e21416ef6d18b6fef32ca4be5ea	061	8f6bc9940d364707bbc6153019fb9c2c.jpg
+-33e722161a5405cf8985125905d0058b	062	8fbab30c4e08409dac3e5e2a2be1cc26.jpg
+-68f849386afbedd05d638bf7d1fc3431	063	91c53219d5d64493b8a29feea775327e.jpg
+-d0c151a252526025dfbc3f6069279e15	064	91f136a79dd1470c996c03421e1efb5a.jpg
+-089964388b17fe4d0b0fcb8144fa104b	065	966d3bd30d724d1589182d77055be592.jpg
+-871704870a6cda899460947cf3fb252e	066	97cdb0ff9ca143038a76e3abc9a60125.jpg
+-d66dde00041438d142fe2daa38606c0a	067	9821e303b7ff4685a1faa04d7a700d3d.jpg
+-410165fc1d819965a18e8eb35bdb8b30	068	9c437604a9894a6aa28ccdc2c2e9e876.jpg
+-9de11a718cda1ac81b867381332c730b	069	Broad_Creations_Logo-01-removebg-preview.png
+-1d76f19c95b301609d630649da4047b2	070	HEKq7D9WkAAFNma.png
+-385731ddc428063a66746ff79e45ca59	071	IMG-20260707-WA0003.jpg
+-7abe08cacbea21aa9bc7a4f74a9d980b	072	IMG-20260707-WA0005.jpg
+-e6136fcdf269635761c614a89703a6f2	073	IMG-20260707-WA0006.jpg
+-ea7f0205e6b35f0ef5cdd9f415d5e1d7	074	Photo from Farouk Pandor
+-e583cf0ecbeb1a9103e8e20c335eb175	075	a2a59e722aff43ae90ff54df6e89cd98.jpg
+-571fa0b8e5964fb65903194fa22e09a3	076	a60bd9e4854a48b986c065eb0ea17a45.jpg
+-2047784f94f48d4d377c8a0b0a750c29	077	a9ceaec04abb4ebc8229fd39de99e816.jpg
+-8d2e8e5b70a603b9f0b6b633d0d43d44	078	aa185e7f31774219863e2fe88f6b4877.jpg
+-ccf3d1bc78163e7f39a27e3f6f51f646	079	acf1ab16f2944c78bb722f004574a24f.jpg
+-b3fcc410983ca200d6ce9902cb9aaf47	080	acf6c7b77198466d886e4cd9ca3b8254.jpg
+-61da21702f9872dbfd3ad5ae2c18a22f	081	b004822bee7d4b5484602aa1784250e9.jpg
+-c68b1d00a2df33079d0a9543f14ca59f	082	b147cd8b71b640d1908241887d5dcff7.jpg
+-ed773b0eb3b78f038134d66925dbce15	083	b773ed161ad34a759636340c5a6410a4.jpg
+-65260494624f08d8d36dc069b7d7d50a	084	b87a1543d67f4631bb4b3829e52a3e4a.jpg
+-54d50f7320fb675990200e7b44d35574	085	bdddcaa2ecfb4af7ac0e3677a58eeb32.jpg
+-f1dac7bb1b70ba12101baa07f86db86b	086	c4d44f21205c4bbebb6de43e10ac255c.jpg
+-c02ac8ea1a9288e4e52bc00c246bbbec	087	c579c5d8dffc4dc8b08332fb5865917e.jpg
+-1ae81269ce6fc010a2803530da9a0492	088	ca2e0b874d134ebb8025f577230d466d.jpg
+-ddf8bb1a2fca0b2bb18fdd37d9ec8f28	089	cd55943fae9542a58e066d099c47bbf6.jpg
+-ffee00519986bf2fbaafe356ff816d16	090	e19c5db6e473419d903463c8e86e592d.jpg
+-c75f08305f32dc1f29561dbe311894a7	091	e4d0b963cea3462db496a421e2ce872e.jpg
+-a9bf265f941e63d11c2528f544804de3	092	e58b628b918a43f8b98b50b0102c6ca8.jpg
+-d88ef5d6a624a2f9dd8af02b25674a3c	093	f27ee2efea654b66bcfd23e7a0ed46dd.jpg
+-d6b8c5ed67cba75afe60d369aeaf6545	094	f77545b9553141fe8e93ff7594a50912.jpg
+-8cc275b3b5d84f6069b52407893c6c94	095	fa197b9df5b945ee8679a8057ab0eacd.jpg
+-b98533159d515ff43aeeb9ccc6a2d2fc	096	fffb239e971e40d0991a2f7b87bd2806.jpg
+diff --git a/_drive-work/order.tsv b/_drive-work/order.tsv
+deleted file mode 100644
+index 0b83b84..0000000
+--- a/_drive-work/order.tsv
++++ /dev/null
+@@ -1,96 +0,0 @@
+-001	1b4Z3jN8An1bytqrzzzso3iCV1y8IhnOy	0031fa6db9ac483fa4945efab5751676.jpg
+-002	1TThvLsQigplUpafE5NBWg9ipdNZMqvkz	0256894a3b5c47c182b177c44006c178.jpg
+-003	1eCXZAvBY3_B2zfDM-BjjCRrt4SSulxLh	056c4139d7384c53af7ce900ad0590fc.jpg
+-004	1hUReMoHmN1O8fQd8t-PAIMDq40QiMid6	0a27e459fec24cd1bda50c749d8bb23c.jpg
+-005	1OwnLCJCJvTcHoOqdrOMxgsA1UM98yneX	0b2bc3efbdf04683b2d07356621fa1ce.jpg
+-006	1gyiI01O80_Z70oZ0t5Bwd2aPJknJ99Y6	0c91f2475e9341289d11a89f7c8c564e.jpg
+-007	1uHJIUsHpN7g7h-GQNsp14aSCiTAqKw40	0c950a51cc9a40ddb2e7b69066774c17.jpg
+-008	1-9Q58vwCayEO1Xc74KmY2QZQdHOzbCS7	0dbacffd50454d358304bc76af2477b7.jpg
+-009	1SUFBjLPQvYIXuhQ85Z5-GRSgICBpbCdl	0f21e27eeba8424e97e34216d39c92c3.jpg
+-010	1ZPmu7QJUEoUw8SW-M9sxm_L0AoiW7nHf	137d34fc15444d39bf027d6dadcba92a.jpg
+-011	1qmr8OrbKrdr01XF7nMcLZMs97hXHj1mw	1474240206e841588e8ddb7d2080babc.jpg
+-012	1OmqFcAiSOuUoPWHRCqdGSCbwmqFIQ11V	166a1e4356974ecdad01bf0c8262c976.jpg
+-013	1CSjigV2T1nYXipuGemKjnQAPrmzUtRFG	16c135e36cdd4180a286ce651bc17752.jpg
+-014	1Ww2RDOiPJlPGFOZrFfVF5KlKMkVtyh3N	1b609c3c484b447a98db414a00d1b793.jpg
+-015	1BMKPI8XjMduMtZmA_sfnVeK3B0hKuUw_	1ea0f961b574412e9c889b88956e6fb4.jpg
+-016	1MDpYrCoZsDR8qtKXhHlrZ0x2hL8s7Z6A	201fe361d1714ec7b0892fbb6c387e30.jpg
+-017	1I6JYJLaHPCQ3s3jrQrQ9eRNMq55iF32T	23145ac900084f37aa194ba50de9dcbc.jpg
+-018	15JAUmT-0Bt1EpsbeRl-n44y2NQwYK1TW	250c8849b8054d93b7c3ac318ca941a9.jpg
+-019	1kHR9AFulPUQQfXT17eQzbHyspenz21tu	2758bb378ad84452adc1da05976766ff.jpg
+-020	1YisEln7ni2CXEII2TV82duje7TSgxVFd	29d8dc0d0233478e9d014b8ae6403b51.jpg
+-021	1g2goHLS7L6cLBzzBYSISbX5QVO10v606	2c2887759e1c4561bdaabb887a311e3b.jpg
+-022	19_U6UkeFv8kq3aES79q_oeFI_nSr8p_4	2c6cc37b9ec04d66b47c5210fc81e275.jpg
+-023	1OZjiwyZjo8sKCC4sJO4i_y3jBJyxAh1d	2fa538320d8141af95de0ae4fd2be4cb.jpg
+-024	1o-3B9Swyx_PsbGzFY-D17Ror7lOGctqR	315bbf69825e4bc699073708c2cff0e2.jpg
+-025	1cZs1XxFANXXdN3NrJ1clrRZ4EJugvtk-	32045c83027345f2b6c389864a06b06b.jpg
+-026	1d0AMJyKtVTWB08u2sDZ2ZTTGDB9hNBWt	32d50250aecf4ed991ea612a95aabe6b.jpg
+-027	19SX_YFYvhxsq_MgiWMWlWtw7TkSSXFFE	33e4cc6a2690487883a99bb4c73a8092.jpg
+-028	11PjMpE1dOsxWDsEgonpfqL7OA13ufy-T	34392b8e4f574102821ac44418cbfa57.jpg
+-029	1LQjptRt8c3XMWiTTgIhIasyO1sYeYgR3	37d76078be0b4ba882e341651e49a118.jpg
+-030	1wia8Wgs_jihUZcfGxdeTm4WmZvZvT1Ls	39969c18586f4693a9ad411bdec07a14.jpg
+-031	19dpY19U7m8t5VyHUEhHHisXfWKte0lX7	3e90c02fc9e043979d41603bca99ba22.jpg
+-032	1TKbRnIQbakviLcAw3tTNUer6iLoE_LLc	41f7792d18bd43c7ae0e09303adfa69b.jpg
+-033	1xQWtWSCnVUJ6r3FTKiyeqQUVOrt0lV4M	43ef0e1ff60e4c73bbf3d3fe5e708fc5.jpg
+-034	1-RGr383-XO1RIeEYyT0THL5TI1bsMbIJ	478f7a849530473684fcbc8fde12b4db.jpg
+-035	1o_lcOCL8JblruRq3V5KDBJ9F7p5q74-Y	491be34aa5804078987ebb62bf437cac.jpg
+-036	1AJ7Q35lfVLWzQifODD-nCgQOH62zNj3U	49a71b16c5c34f37992e208457956021.jpg
+-037	1gUx8eTDXBNm8Z4eCu6Wb4bshojPf5wCF	4a672e88e3074b308cc56be0b5999ac3.jpg
+-038	1jZL86RrpF8KCz0d0DISrw3zkgpuJcCZ5	4ba151721f1847aeb2a1d02585ff8bc5.jpg
+-039	1cfuoWyjrm_4gV_xUe8mVNIMVx9UmntSK	4ed95fc10f5749d7bc846855a38f68a5.jpg
+-040	1XCnnL3G3lDP_rkl2nbWgtKcbue7MLXHq	4f0cdf9641a9432c97706eac658ec8c5.jpg
+-041	1gBVLTKrQzOn8Kx9KVNyIJtiswrc5PKfG	4f622f47da5341ddbb19265bfa640cc8.jpg
+-042	11HaW1ja_fdCYk8RkP_Xqmiq0V04p2e_U	4fd6a3ddadb44f3c8f15bb740630d4e4.jpg
+-043	12qne8Pt6Z6oasPOXi1Y6-NuQoPnkBh3i	53a19702ebe94d84b3168d21bbb11c06.jpg
+-044	1PL74WE9jFBKXMpIiuKhELncUuFDfi2TA	58e70a29e33b47d280de43e752831c3e.jpg
+-045	13djwUIJZldLnUcBrt5V9W6rBIti1ru3b	5a80fef96f764352b2cea1f9bbbef177.jpg
+-046	1JvnF7YNFNYn8MnNDr-5igFZ9m2AENcZf	61371ee6572c4f5793c4fd024564d26c.jpg
+-047	17T6fanZJ02FwXmbUCDxg-53qoibeelNm	62c78a24cb6d43f88e5336d4e3df466c.jpg
+-048	1bUxp8d9nVyL6uEJEsvqB-Y44IzWzE-dY	694f595cdf7e4b9d9b7ec1bb4bc0d6d4.jpg
+-049	1BWuoisUJSkK7dOblST3wrzf79NqL56oJ	69f33c6cd834447b8bca78852bc751a7.jpg
+-050	1VqaucolT6JThSl-ecVenyCsicVobrvGi	6d9b209f7df64a16a913e46c1a560f87.jpg
+-051	1Pc6bZ0948tZy3H_fgZyEf1t40J84C_dn	72a799fd98df4d42be53c7d732599a59.jpg
+-052	19ygSHIOrIX86uyPA8S7lTbfWTzpXJS9g	77b48669d54043f79fa82c729ef7478a.jpg
+-053	1__ioDyhxMVybLzNB3Do8j3VBz8UAE-rM	7dbe1da65d374500a2b67962e6158ba2.jpg
+-054	1zXiwRkqRI-5G1QFHLv6UQKcPFkQ4xbPN	827f134eafed4bf3b141cdbdf4039ec3.jpg
+-055	1YZndJ0DP4JUlIU4BuMA550ienJPZ_vR7	84093e4f955a48939993a8d4b0b59a2b.jpg
+-056	1LCR3BcrEnqi4jqueIVFKSruubRERI_hG	88b83236a8204f0f9ca2b3dfec2f7c2a.jpg
+-057	1G6GWL9N3pV--zXAuC0V_jK43dlT-F_GV	89b94bfb4a1246a5be1ac9b18c1c2625.jpg
+-058	1zkz0Wcpkg5IyLTiKEPPOmSjG_g8g_4SN	8a7b47918eba447e87cca160fc9dd5b6.jpg
+-059	1zzc9LkLx3G03L3OmeNvOL3mGofuTWG6C	8bd50236b89444ad8570ec849fb70740.jpg
+-060	1fhDcWK0RcI6ddI3FbO2nhOtwN_9hZZFu	8e9ac7b7401145f285ed7586d38fe4c9.jpg
+-061	1hSzkxFG6g7SRgrHhI2yJQVOJomcNIn4J	8f6bc9940d364707bbc6153019fb9c2c.jpg
+-062	1Ki-v10rTWd-Bbn4Ayd94sJ61ITP2WkIO	8fbab30c4e08409dac3e5e2a2be1cc26.jpg
+-063	1LLlwLn-1Pr50l8rJ1ln3mt7sTsOqmK_u	91c53219d5d64493b8a29feea775327e.jpg
+-064	1XtRIu_APGbtZcv6FruxPghZEMV9Nnhgw	91f136a79dd1470c996c03421e1efb5a.jpg
+-065	1E9BAGLMDP7mdvRKPGfcm7pMllTqO5XXK	966d3bd30d724d1589182d77055be592.jpg
+-066	1kkMxc9Aax_DM-cT8ecl4VLU3ig4wOchA	97cdb0ff9ca143038a76e3abc9a60125.jpg
+-067	12yEm_l5QhhszW51E61GwCtlS6gw15ex3	9821e303b7ff4685a1faa04d7a700d3d.jpg
+-068	10e-p-EFUlONpm_1BE3Rqt6jLR_g7n4Ns	9c437604a9894a6aa28ccdc2c2e9e876.jpg
+-069	1C_iqGlz7biZiFt2QfCYzw5YBtO6UH8xF	Broad_Creations_Logo-01-removebg-preview.png
+-070	1ZiKTmdxm9C9FbjQ4wOfI5SdU05_-M7Ki	HEKq7D9WkAAFNma.png
+-071	1IWy8apJ3ne8386VUk92hl1t2BJVo74ZJ	IMG-20260707-WA0003.jpg
+-072	1wweYYm_sNazdI5HfdQuTm3V9-YXN7ueB	IMG-20260707-WA0005.jpg
+-073	1olVULTsyi5-PjdSTxgnRp4-1-t0gl6KK	IMG-20260707-WA0006.jpg
+-074	1-oMPPF6xkMJNl50Ln-NYLwBiyKwcfpl4	Photo from Farouk Pandor
+-075	1BDaHO0-foEDt_q3XvA9LaC3HtdIRnZCS	a2a59e722aff43ae90ff54df6e89cd98.jpg
+-076	1H-Y1CIoWLS9WLU9D9brxsJUHHE6h5NFm	a60bd9e4854a48b986c065eb0ea17a45.jpg
+-077	1KEJxcSrEAW5oZSB9JIjwV3-1xNebc41N	a9ceaec04abb4ebc8229fd39de99e816.jpg
+-078	1q6ST3Estjo1d2TSVy9J4cLykZhxbYsJn	aa185e7f31774219863e2fe88f6b4877.jpg
+-079	13qIhF0vFFi2-9hsER17_84HCqVgeuEc5	acf1ab16f2944c78bb722f004574a24f.jpg
+-080	1QwNqD-gNYKnpPZaG0sd0mYuIHQdRH-qW	acf6c7b77198466d886e4cd9ca3b8254.jpg
+-081	12RHsuHHAkKSxBrGe8cMZQsg-Hc8st0BR	b004822bee7d4b5484602aa1784250e9.jpg
+-082	1QBBNqud9gMhL7ca-925B4sOeDwOZc58b	b147cd8b71b640d1908241887d5dcff7.jpg
+-083	123NLjDnq3fq0Z7yIxgWTS4bgrFcmvbSW	b773ed161ad34a759636340c5a6410a4.jpg
+-084	1iKfi8pQzMRFJEKQIrR1njRxa6roixrD5	b87a1543d67f4631bb4b3829e52a3e4a.jpg
+-085	1kcoVIAM_vECO2cc6i5bozBMCoi8fUOiO	bdddcaa2ecfb4af7ac0e3677a58eeb32.jpg
+-086	1VmqxK-a6IY5l6UmC_MhKP6eK8hQuTqep	c4d44f21205c4bbebb6de43e10ac255c.jpg
+-087	1nQp_EkYYUwmI8_qRItwx7aKd37iuX8EX	c579c5d8dffc4dc8b08332fb5865917e.jpg
+-088	1mCx1mu8HbWu9D8D3dd0TWKA8PG6DlzUv	ca2e0b874d134ebb8025f577230d466d.jpg
+-089	14ZL_fmbOc1LA9SMENq_eAQOVwBs9N7V-	cd55943fae9542a58e066d099c47bbf6.jpg
+-090	1lf4hqYcd5VlAE8hj8heqJkPMnMvZE4q_	e19c5db6e473419d903463c8e86e592d.jpg
+-091	1Ggxb2vNZmLeV-7aIEvbS7Q-00a6efnti	e4d0b963cea3462db496a421e2ce872e.jpg
+-092	1nDyRaVqkxd5OWj9sJDrVU5iuMrjSOdtU	e58b628b918a43f8b98b50b0102c6ca8.jpg
+-093	1jFT4M1BkPT_kuhL3gI70OORUsyDPPDAc	f27ee2efea654b66bcfd23e7a0ed46dd.jpg
+-094	1Am1tMWkRuzIy60TZbaO1NUzbrhe-2Li5	f77545b9553141fe8e93ff7594a50912.jpg
+-095	1152EE9TQtxT1_xbMjD-EpTqhS_IwQZyQ	fa197b9df5b945ee8679a8057ab0eacd.jpg
+-096	1OvV14M4hh0QIcA_nOW2NfejwpX2XlNHF	fffb239e971e40d0991a2f7b87bd2806.jpg
+diff --git a/_drive-work/sorted.tsv b/_drive-work/sorted.tsv
+deleted file mode 100644
+index 6816d38..0000000
+--- a/_drive-work/sorted.tsv
++++ /dev/null
+@@ -1,96 +0,0 @@
+-1b4Z3jN8An1bytqrzzzso3iCV1y8IhnOy	0031fa6db9ac483fa4945efab5751676.jpg
+-1TThvLsQigplUpafE5NBWg9ipdNZMqvkz	0256894a3b5c47c182b177c44006c178.jpg
+-1eCXZAvBY3_B2zfDM-BjjCRrt4SSulxLh	056c4139d7384c53af7ce900ad0590fc.jpg
+-1hUReMoHmN1O8fQd8t-PAIMDq40QiMid6	0a27e459fec24cd1bda50c749d8bb23c.jpg
+-1OwnLCJCJvTcHoOqdrOMxgsA1UM98yneX	0b2bc3efbdf04683b2d07356621fa1ce.jpg
+-1gyiI01O80_Z70oZ0t5Bwd2aPJknJ99Y6	0c91f2475e9341289d11a89f7c8c564e.jpg
+-1uHJIUsHpN7g7h-GQNsp14aSCiTAqKw40	0c950a51cc9a40ddb2e7b69066774c17.jpg
+-1-9Q58vwCayEO1Xc74KmY2QZQdHOzbCS7	0dbacffd50454d358304bc76af2477b7.jpg
+-1SUFBjLPQvYIXuhQ85Z5-GRSgICBpbCdl	0f21e27eeba8424e97e34216d39c92c3.jpg
+-1ZPmu7QJUEoUw8SW-M9sxm_L0AoiW7nHf	137d34fc15444d39bf027d6dadcba92a.jpg
+-1qmr8OrbKrdr01XF7nMcLZMs97hXHj1mw	1474240206e841588e8ddb7d2080babc.jpg
+-1OmqFcAiSOuUoPWHRCqdGSCbwmqFIQ11V	166a1e4356974ecdad01bf0c8262c976.jpg
+-1CSjigV2T1nYXipuGemKjnQAPrmzUtRFG	16c135e36cdd4180a286ce651bc17752.jpg
+-1Ww2RDOiPJlPGFOZrFfVF5KlKMkVtyh3N	1b609c3c484b447a98db414a00d1b793.jpg
+-1BMKPI8XjMduMtZmA_sfnVeK3B0hKuUw_	1ea0f961b574412e9c889b88956e6fb4.jpg
+-1MDpYrCoZsDR8qtKXhHlrZ0x2hL8s7Z6A	201fe361d1714ec7b0892fbb6c387e30.jpg
+-1I6JYJLaHPCQ3s3jrQrQ9eRNMq55iF32T	23145ac900084f37aa194ba50de9dcbc.jpg
+-15JAUmT-0Bt1EpsbeRl-n44y2NQwYK1TW	250c8849b8054d93b7c3ac318ca941a9.jpg
+-1kHR9AFulPUQQfXT17eQzbHyspenz21tu	2758bb378ad84452adc1da05976766ff.jpg
+-1YisEln7ni2CXEII2TV82duje7TSgxVFd	29d8dc0d0233478e9d014b8ae6403b51.jpg
+-1g2goHLS7L6cLBzzBYSISbX5QVO10v606	2c2887759e1c4561bdaabb887a311e3b.jpg
+-19_U6UkeFv8kq3aES79q_oeFI_nSr8p_4	2c6cc37b9ec04d66b47c5210fc81e275.jpg
+-1OZjiwyZjo8sKCC4sJO4i_y3jBJyxAh1d	2fa538320d8141af95de0ae4fd2be4cb.jpg
+-1o-3B9Swyx_PsbGzFY-D17Ror7lOGctqR	315bbf69825e4bc699073708c2cff0e2.jpg
+-1cZs1XxFANXXdN3NrJ1clrRZ4EJugvtk-	32045c83027345f2b6c389864a06b06b.jpg
+-1d0AMJyKtVTWB08u2sDZ2ZTTGDB9hNBWt	32d50250aecf4ed991ea612a95aabe6b.jpg
+-19SX_YFYvhxsq_MgiWMWlWtw7TkSSXFFE	33e4cc6a2690487883a99bb4c73a8092.jpg
+-11PjMpE1dOsxWDsEgonpfqL7OA13ufy-T	34392b8e4f574102821ac44418cbfa57.jpg
+-1LQjptRt8c3XMWiTTgIhIasyO1sYeYgR3	37d76078be0b4ba882e341651e49a118.jpg
+-1wia8Wgs_jihUZcfGxdeTm4WmZvZvT1Ls	39969c18586f4693a9ad411bdec07a14.jpg
+-19dpY19U7m8t5VyHUEhHHisXfWKte0lX7	3e90c02fc9e043979d41603bca99ba22.jpg
+-1TKbRnIQbakviLcAw3tTNUer6iLoE_LLc	41f7792d18bd43c7ae0e09303adfa69b.jpg
+-1xQWtWSCnVUJ6r3FTKiyeqQUVOrt0lV4M	43ef0e1ff60e4c73bbf3d3fe5e708fc5.jpg
+-1-RGr383-XO1RIeEYyT0THL5TI1bsMbIJ	478f7a849530473684fcbc8fde12b4db.jpg
+-1o_lcOCL8JblruRq3V5KDBJ9F7p5q74-Y	491be34aa5804078987ebb62bf437cac.jpg
+-1AJ7Q35lfVLWzQifODD-nCgQOH62zNj3U	49a71b16c5c34f37992e208457956021.jpg
+-1gUx8eTDXBNm8Z4eCu6Wb4bshojPf5wCF	4a672e88e3074b308cc56be0b5999ac3.jpg
+-1jZL86RrpF8KCz0d0DISrw3zkgpuJcCZ5	4ba151721f1847aeb2a1d02585ff8bc5.jpg
+-1cfuoWyjrm_4gV_xUe8mVNIMVx9UmntSK	4ed95fc10f5749d7bc846855a38f68a5.jpg
+-1XCnnL3G3lDP_rkl2nbWgtKcbue7MLXHq	4f0cdf9641a9432c97706eac658ec8c5.jpg
+-1gBVLTKrQzOn8Kx9KVNyIJtiswrc5PKfG	4f622f47da5341ddbb19265bfa640cc8.jpg
+-11HaW1ja_fdCYk8RkP_Xqmiq0V04p2e_U	4fd6a3ddadb44f3c8f15bb740630d4e4.jpg
+-12qne8Pt6Z6oasPOXi1Y6-NuQoPnkBh3i	53a19702ebe94d84b3168d21bbb11c06.jpg
+-1PL74WE9jFBKXMpIiuKhELncUuFDfi2TA	58e70a29e33b47d280de43e752831c3e.jpg
+-13djwUIJZldLnUcBrt5V9W6rBIti1ru3b	5a80fef96f764352b2cea1f9bbbef177.jpg
+-1JvnF7YNFNYn8MnNDr-5igFZ9m2AENcZf	61371ee6572c4f5793c4fd024564d26c.jpg
+-17T6fanZJ02FwXmbUCDxg-53qoibeelNm	62c78a24cb6d43f88e5336d4e3df466c.jpg
+-1bUxp8d9nVyL6uEJEsvqB-Y44IzWzE-dY	694f595cdf7e4b9d9b7ec1bb4bc0d6d4.jpg
+-1BWuoisUJSkK7dOblST3wrzf79NqL56oJ	69f33c6cd834447b8bca78852bc751a7.jpg
+-1VqaucolT6JThSl-ecVenyCsicVobrvGi	6d9b209f7df64a16a913e46c1a560f87.jpg
+-1Pc6bZ0948tZy3H_fgZyEf1t40J84C_dn	72a799fd98df4d42be53c7d732599a59.jpg
+-19ygSHIOrIX86uyPA8S7lTbfWTzpXJS9g	77b48669d54043f79fa82c729ef7478a.jpg
+-1__ioDyhxMVybLzNB3Do8j3VBz8UAE-rM	7dbe1da65d374500a2b67962e6158ba2.jpg
+-1zXiwRkqRI-5G1QFHLv6UQKcPFkQ4xbPN	827f134eafed4bf3b141cdbdf4039ec3.jpg
+-1YZndJ0DP4JUlIU4BuMA550ienJPZ_vR7	84093e4f955a48939993a8d4b0b59a2b.jpg
+-1LCR3BcrEnqi4jqueIVFKSruubRERI_hG	88b83236a8204f0f9ca2b3dfec2f7c2a.jpg
+-1G6GWL9N3pV--zXAuC0V_jK43dlT-F_GV	89b94bfb4a1246a5be1ac9b18c1c2625.jpg
+-1zkz0Wcpkg5IyLTiKEPPOmSjG_g8g_4SN	8a7b47918eba447e87cca160fc9dd5b6.jpg
+-1zzc9LkLx3G03L3OmeNvOL3mGofuTWG6C	8bd50236b89444ad8570ec849fb70740.jpg
+-1fhDcWK0RcI6ddI3FbO2nhOtwN_9hZZFu	8e9ac7b7401145f285ed7586d38fe4c9.jpg
+-1hSzkxFG6g7SRgrHhI2yJQVOJomcNIn4J	8f6bc9940d364707bbc6153019fb9c2c.jpg
+-1Ki-v10rTWd-Bbn4Ayd94sJ61ITP2WkIO	8fbab30c4e08409dac3e5e2a2be1cc26.jpg
+-1LLlwLn-1Pr50l8rJ1ln3mt7sTsOqmK_u	91c53219d5d64493b8a29feea775327e.jpg
+-1XtRIu_APGbtZcv6FruxPghZEMV9Nnhgw	91f136a79dd1470c996c03421e1efb5a.jpg
+-1E9BAGLMDP7mdvRKPGfcm7pMllTqO5XXK	966d3bd30d724d1589182d77055be592.jpg
+-1kkMxc9Aax_DM-cT8ecl4VLU3ig4wOchA	97cdb0ff9ca143038a76e3abc9a60125.jpg
+-12yEm_l5QhhszW51E61GwCtlS6gw15ex3	9821e303b7ff4685a1faa04d7a700d3d.jpg
+-10e-p-EFUlONpm_1BE3Rqt6jLR_g7n4Ns	9c437604a9894a6aa28ccdc2c2e9e876.jpg
+-1C_iqGlz7biZiFt2QfCYzw5YBtO6UH8xF	Broad_Creations_Logo-01-removebg-preview.png
+-1ZiKTmdxm9C9FbjQ4wOfI5SdU05_-M7Ki	HEKq7D9WkAAFNma.png
+-1IWy8apJ3ne8386VUk92hl1t2BJVo74ZJ	IMG-20260707-WA0003.jpg
+-1wweYYm_sNazdI5HfdQuTm3V9-YXN7ueB	IMG-20260707-WA0005.jpg
+-1olVULTsyi5-PjdSTxgnRp4-1-t0gl6KK	IMG-20260707-WA0006.jpg
+-1-oMPPF6xkMJNl50Ln-NYLwBiyKwcfpl4	Photo from Farouk Pandor
+-1BDaHO0-foEDt_q3XvA9LaC3HtdIRnZCS	a2a59e722aff43ae90ff54df6e89cd98.jpg
+-1H-Y1CIoWLS9WLU9D9brxsJUHHE6h5NFm	a60bd9e4854a48b986c065eb0ea17a45.jpg
+-1KEJxcSrEAW5oZSB9JIjwV3-1xNebc41N	a9ceaec04abb4ebc8229fd39de99e816.jpg
+-1q6ST3Estjo1d2TSVy9J4cLykZhxbYsJn	aa185e7f31774219863e2fe88f6b4877.jpg
+-13qIhF0vFFi2-9hsER17_84HCqVgeuEc5	acf1ab16f2944c78bb722f004574a24f.jpg
+-1QwNqD-gNYKnpPZaG0sd0mYuIHQdRH-qW	acf6c7b77198466d886e4cd9ca3b8254.jpg
+-12RHsuHHAkKSxBrGe8cMZQsg-Hc8st0BR	b004822bee7d4b5484602aa1784250e9.jpg
+-1QBBNqud9gMhL7ca-925B4sOeDwOZc58b	b147cd8b71b640d1908241887d5dcff7.jpg
+-123NLjDnq3fq0Z7yIxgWTS4bgrFcmvbSW	b773ed161ad34a759636340c5a6410a4.jpg
+-1iKfi8pQzMRFJEKQIrR1njRxa6roixrD5	b87a1543d67f4631bb4b3829e52a3e4a.jpg
+-1kcoVIAM_vECO2cc6i5bozBMCoi8fUOiO	bdddcaa2ecfb4af7ac0e3677a58eeb32.jpg
+-1VmqxK-a6IY5l6UmC_MhKP6eK8hQuTqep	c4d44f21205c4bbebb6de43e10ac255c.jpg
+-1nQp_EkYYUwmI8_qRItwx7aKd37iuX8EX	c579c5d8dffc4dc8b08332fb5865917e.jpg
+-1mCx1mu8HbWu9D8D3dd0TWKA8PG6DlzUv	ca2e0b874d134ebb8025f577230d466d.jpg
+-14ZL_fmbOc1LA9SMENq_eAQOVwBs9N7V-	cd55943fae9542a58e066d099c47bbf6.jpg
+-1lf4hqYcd5VlAE8hj8heqJkPMnMvZE4q_	e19c5db6e473419d903463c8e86e592d.jpg
+-1Ggxb2vNZmLeV-7aIEvbS7Q-00a6efnti	e4d0b963cea3462db496a421e2ce872e.jpg
+-1nDyRaVqkxd5OWj9sJDrVU5iuMrjSOdtU	e58b628b918a43f8b98b50b0102c6ca8.jpg
+-1jFT4M1BkPT_kuhL3gI70OORUsyDPPDAc	f27ee2efea654b66bcfd23e7a0ed46dd.jpg
+-1Am1tMWkRuzIy60TZbaO1NUzbrhe-2Li5	f77545b9553141fe8e93ff7594a50912.jpg
+-1152EE9TQtxT1_xbMjD-EpTqhS_IwQZyQ	fa197b9df5b945ee8679a8057ab0eacd.jpg
+-1OvV14M4hh0QIcA_nOW2NfejwpX2XlNHF	fffb239e971e40d0991a2f7b87bd2806.jpg

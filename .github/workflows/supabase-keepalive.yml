@@ -1,0 +1,61 @@
+# ==============================================================================
+# ZERO-COST SUPABASE FREE-TIER AUTO-PAUSE KEEPALIVE WORKFLOW
+# ==============================================================================
+# WHY THIS EXISTS:
+# Supabase Free Tier pauses database projects after 7 consecutive days with zero
+# API/SQL traffic. By running this free GitHub Actions schedule every 72 hours
+# (Monday & Thursday at 04:00 UTC / 06:00 Gaborone CAT), your free Supabase
+# project receives regular authenticated REST + Auth health pings and NEVER
+# auto-pauses — $0.00/month forever!
+#
+# SETUP (ONE TIME — TAKES 60 SECONDS IN GITHUB):
+# 1. Copy this file to `.github/workflows/supabase-keepalive.yml` in your repo.
+# 2. Go to GitHub Repo -> Settings -> Secrets and variables -> Actions -> New repository secret:
+#      - SUPABASE_URL       = https://<your-project-ref>.supabase.co
+#      - SUPABASE_ANON_KEY  = <your-public-anon-jwt-key>
+# 3. Click the "Actions" tab -> "Supabase Free-Tier Keepalive" -> "Run workflow" once to test!
+# ==============================================================================
+
+name: Supabase Free-Tier Keepalive
+
+on:
+  schedule:
+    # Runs every Monday and Thursday at 04:00 UTC (06:00 Africa/Gaborone — every 3–4 days, safely inside 7-day limit)
+    - cron: "0 4 * * 1,4"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  keepalive-ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping Supabase PostgREST & Auth Health Endpoints
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+            echo "::error::Missing SUPABASE_URL or SUPABASE_ANON_KEY GitHub Actions secrets."
+            exit 1
+          fi
+
+          # 1. Hit PostgREST schema root so Postgres registers live database activity
+          HTTP_REST=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL%/}/rest/v1/" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+
+          # 2. Hit GoTrue Auth health check
+          HTTP_AUTH=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL%/}/auth/v1/health" \
+            -H "apikey: ${SUPABASE_ANON_KEY}")
+
+          echo "Supabase PostgREST HTTP=${HTTP_REST} | Auth HTTP=${HTTP_AUTH} at $(date -u +%FT%TZ)"
+          if [ "${HTTP_REST}" -ge 500 ]; then
+            echo "::error::Supabase returned server error ${HTTP_REST} — check if project needs one initial manual Restore in Dashboard."
+            exit 1
+          fi

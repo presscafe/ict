@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Khoemacau 2.0 — Next-Gen Digital Platform, Anti-Fraud Verifier &amp; Competitive Pitch Concept</title>
+  <meta name="description" content="Independent strategic digital concept and live anti-fraud supplier/recruitment verification prototype prepared for Khoemacau Copper Mining (Pty) Ltd by Press Cafe (Pty) Ltd." />
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    :root {
+      --bg-obsidian: #0c131d;
+      --bg-slate: #131e2c;
+      --bg-card-dark: #192738;
+      --bg-paper: #f6f7f9;
+      --bg-surface: #ffffff;
+      --ink: #101824;
+      --ink-muted: #526071;
+      --line: #dce2ea;
+      --line-dark: rgba(255, 255, 255, 0.13);
+      --copper: #c86428;
+      --copper-bright: #e37b3c;
+      --copper-pale: #fdf2eb;
+      --emerald: #0f7b55;
+      --emerald-bg: #e8f7f1;
+      --crimson: #b91c1c;
+      --crimson-bg: #fef2f2;
+      --amber: #b45309;
+      --amber-bg: #fffbeb;
+      --radius: 12px;
+      --maxw: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+      background: var(--bg-paper);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    /* Low-bandwidth 3G Kalahari Field Mode */
+    body.field-3g .visual-flourish { display: none !important; }
+    body.field-3g .hero { background: #0c131d !important; padding: 28px 0 32px; }
+    body.field-3g * { animation: none !important; transition: none !important; box-shadow: none !important; }
+
+    .container {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Concept Governance Strip */
+    .concept-banner {
+      background: #070b11;
+      color: #dce5f0;
+      font-size: 12.5px;
+      border-bottom: 1px solid rgba(227, 123, 60, 0.35);
+      padding: 9px 0;
+    }
+    .concept-banner-inner {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .badge-copper {
+      background: rgba(200, 100, 40, 0.24);
+      color: #ffb07c;
+      border: 1px solid rgba(227, 123, 60, 0.5);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: background 0.16s ease, transform 0.12s ease;
+    }
+    .btn-copper {
+      background: var(--copper);
+      color: #fff;
+      border-color: var(--copper);
+    }
+    .btn-copper:hover { background: #ad531e; }
+    .btn-ghost-dark {
+      background: rgba(255, 255, 255, 0.08);
+      color: #eef3f8;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .btn-ghost-dark:hover { background: rgba(255, 255, 255, 0.16); }
+    .btn-outline {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    .btn-outline:hover { background: #f0f3f7; }
+
+    /* Navigation Header */
+    .site-nav {
+      background: var(--bg-obsidian);
+      color: #fff;
+      border-bottom: 1px solid var(--line-dark);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .nav-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      gap: 14px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .brand-symbol {
+      width: 40px;
+      height: 40px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--copper) 0%, #8f3f12 100%);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      color: #fff;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      margin: 0;
+    }
+    .brand-sub {
+      font-size: 11.5px;
+      color: #9cb0c6;
+      margin: 0;
+    }
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13.5px;
+    }
+    .nav-links a {
+      color: #d0dceb;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .nav-links a:hover { color: #ffb07c; }
+
+    /* Hero Section */
+    .hero {
+      background:
+        radial-gradient(circle at 82% 18%, rgba(200, 100, 40, 0.26), transparent 44%),
+        linear-gradient(165deg, #0b121c 0%, #142234 62%, #19293d 100%);
+      color: #fff;
+      padding: 52px 0 56px;
+      border-bottom: 3px solid var(--copper);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 920px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+    .eyebrow {
+      color: #ffab73;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-bottom: 10px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.13;
+      margin: 0 0 16px;
+      letter-spacing: -0.02em;
+    }
+    .hero p.lead {
+      font-size: 16.5px;
+      color: #cbd8e6;
+      margin: 0 0 24px;
+      max-width: 62ch;
+    }
+    .telemetry-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 26px;
+    }
+    @media (max-width: 680px) {
+      .telemetry-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+    .telemetry-card {
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid var(--line-dark);
+      border-radius: 10px;
+      padding: 13px 14px;
+    }
+    .telemetry-val {
+      font-size: 21px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .telemetry-lbl {
+      font-size: 11.5px;
+      color: #a6b8cc;
+      margin-top: 3px;
+    }
+
+    /* Live Anti-Fraud Verifier Card */
+    .verifier-card {
+      background: #ffffff;
+      color: var(--ink);
+      border-radius: 14px;
+      padding: 22px;
+      border: 2px solid rgba(227, 123, 60, 0.55);
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.28);
+    }
+    .verifier-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .live-pill {
+      background: var(--crimson-bg);
+      color: var(--crimson);
+      border: 1px solid #fecaca;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .verifier-input-row {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0 10px;
+    }
+    .verifier-input-row input {
+      flex: 1;
+      padding: 11px 13px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .verifier-input-row input:focus {
+      outline: 2px solid var(--copper);
+      border-color: var(--copper);
+    }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .chip {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #1e293b;
+    }
+    .chip:hover { background: var(--copper-pale); border-color: var(--copper); }
+    .chip-danger { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+
+    .result-box {
+      border-radius: 10px;
+      padding: 14px 15px;
+      font-size: 13.5px;
+      border: 1.5px solid var(--line);
+      background: #f8fafc;
+    }
+    .result-box.fraud {
+      background: var(--crimson-bg);
+      border-color: #f87171;
+      color: #7f1d1d;
+    }
+    .result-box.valid {
+      background: var(--emerald-bg);
+      border-color: #34d399;
+      color: #064e3b;
+    }
+    .result-box.caution {
+      background: var(--amber-bg);
+      border-color: #fbbf24;
+      color: #78350f;
+    }
+
+    /* Main Content Sections */
+    section.section {
+      padding: 52px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    section.section-alt {
+      background: var(--bg-surface);
+    }
+    .section-head {
+      max-width: 780px;
+      margin-bottom: 28px;
+    }
+    .section-head h2 {
+      font-size: clamp(23px, 3vw, 31px);
+      margin: 0 0 8px;
+      letter-spacing: -0.015em;
+    }
+    .section-head p {
+      margin: 0;
+      color: var(--ink-muted);
+      font-size: 15.5px;
+    }
+
+    /* Competitor Benchmark Table */
+    .table-wrap {
+      overflow-x: auto;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    table.comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    table.comp-table th,
+    table.comp-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    table.comp-table th {
+      background: #0f1722;
+      color: #fff;
+      font-weight: 700;
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+    table.comp-table th.col-win,
+    table.comp-table td.col-win {
+      background: #fdf4ee;
+      border-left: 2px solid var(--copper);
+      border-right: 2px solid var(--copper);
+      font-weight: 600;
+    }
+    table.comp-table th.col-win {
+      background: var(--copper);
+      color: #fff;
+    }
+    .tag-yes { color: var(--emerald); font-weight: 700; }
+    .tag-no { color: var(--crimson); font-weight: 700; }
+    .tag-part { color: var(--amber); font-weight: 600; }
+
+    /* Cards Grid */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+    }
+    @media (max-width: 880px) {
+      .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+    }
+    .card.featured {
+      border: 2px solid var(--copper);
+      position: relative;
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    .price-tag {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--copper);
+      margin: 10px 0 4px;
+    }
+    .checklist-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #fcfdfe;
+      cursor: pointer;
+    }
+    .checklist-item input {
+      margin-top: 4px;
+      transform: scale(1.2);
+      accent-color: var(--copper);
+    }
+    .progress-bar-bg {
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0 8px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--copper), var(--emerald));
+      width: 40%;
+      transition: width 0.25s ease;
+    }
+
+    /* Underground Flow Strip */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 880px) {
+      .flow-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .flow-grid { grid-template-columns: 1fr; }
+    }
+    .flow-step {
+      background: var(--bg-slate);
+      color: #fff;
+      padding: 18px;
+      border-radius: var(--radius);
+      border-top: 3px solid var(--copper);
+    }
+    .flow-step .step-num {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #ffab73;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+    .flow-step h4 { margin: 6px 0 8px; font-size: 16px; }
+    .flow-step p { margin: 0; font-size: 13px; color: #cbd8e6; }
+
+    footer.site-footer {
+      background: var(--bg-obsidian);
+      color: #a9bacd;
+      padding: 34px 0;
+      font-size: 13px;
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      .hero { background: #fff !important; color: #000 !important; padding: 16px 0 !important; }
+      .hero p.lead, .telemetry-lbl, .telemetry-val { color: #000 !important; }
+      section.section { padding: 20px 0 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Transparent Concept Governance Bar -->
+  <div class="concept-banner">
+    <div class="container concept-banner-inner">
+      <div>
+        <span class="badge-copper">Strategic Concept &amp; Live Prototype</span>
+        <span style="margin-left:8px;">Prepared for <strong>Khoemacau Copper Mining (Pty) Ltd (MMG Group)</strong> by <strong>Press Cafe (Pty) Ltd</strong> (100% Botswana Citizen Enterprise)</span>
+      </div>
+      <div class="top-controls no-print">
+        <button type="button" class="btn btn-ghost-dark" id="btn-lang" aria-pressed="false">Setswana / English: EN</button>
+        <button type="button" class="btn btn-ghost-dark" id="btn-3g" aria-pressed="false">Kalahari 3G Mode: OFF</button>
+        <button type="button" class="btn btn-copper" onclick="window.print()">Print 2-Page Executive Brief</button>
+        <a class="btn btn-ghost-dark" href="../index.html">← Back to Command Studio</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="site-nav no-print">
+    <div class="container nav-inner">
+      <a href="#top" class="brand">
+        <div class="brand-symbol">Cu</div>
+        <div>
+          <p class="brand-title">KHOEMACAU 2.0 — DIGITAL PLATFORM CONCEPT</p>
+          <p class="brand-sub" data-i18n="navSub">Kalahari Copperbelt · Ngamiland &amp; Gaborone, Botswana · Aligned with MMG (HKEX: 1208)</p>
+        </div>
+      </a>
+      <nav class="nav-links" aria-label="Concept sections">
+        <a href="#verifier">1. Live Anti-Fraud Verifier</a>
+        <a href="#benchmark">2. Mining Competitor Matrix</a>
+        <a href="#ceep">3. Citizen Supplier (CEEP) Hub</a>
+        <a href="#operations">4. Underground &amp; 130ktpa Story</a>
+        <a href="#roadmap">5. 3-Tier Commercial Proposal</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero + Live 5-Second Anti-Fraud Verifier -->
+  <header class="hero" id="top">
+    <div class="container hero-grid">
+      <div>
+        <div class="eyebrow" data-i18n="heroEyebrow">Kalahari Copperbelt Flagship · High-Grade Underground Copper &amp; Silver</div>
+        <h1 data-i18n="heroTitle">Powering the Global Energy Transition from the Heart of Ngamiland, Botswana.</h1>
+        <p class="lead" data-i18n="heroLead">
+          Designed to outcompete every regional mining peer on cyber trust, rural 3G mobile speed (&lt;1.0s), Setswana/English accessibility, and Citizen Economic Empowerment — while eliminating fake-tender fraud targeting Batswana businesses.
+        </p>
+
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+          <a href="#ceep" class="btn btn-copper" data-i18n="ctaSupplier">Citizen Supplier Portal (CEEP) →</a>
+          <a href="#benchmark" class="btn btn-ghost-dark" data-i18n="ctaBenchmark">View Sandfire / Debswana Benchmark</a>
+        </div>
+
+        <div class="telemetry-strip">
+          <div class="telemetry-card">
+            <div class="telemetry-val">~2.0% Cu</div>
+            <div class="telemetry-lbl">High-Grade Zone 5 Underground Sulfide Ore</div>
+          </div>
+          <div class="telemetry-card">
+            <div class="telemetry-val">→ 130 ktpa</div>
+            <div class="telemetry-lbl">MMG Expansion Trajectory (Copper in Concentrate)</div>
+          </div>
+          <div class="telemetry-card">
+            <div class="telemetry-val">90%+</div>
+            <div class="telemetry-lbl">Batswana Citizen Workforce &amp; Localization Focus</div>
+          </div>
+          <div class="telemetry-card">
+            <div class="telemetry-val">&lt; 0.9s</div>
+            <div class="telemetry-lbl">Toteng / Sehithwa / Maun 3G Mobile Load Target</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE LIVE DEMO MODULE 1: ANTI-FRAUD VERIFIER -->
+      <div class="verifier-card" id="verifier">
+        <div class="verifier-header">
+          <strong>Instant Official Tender, PO &amp; Domain Verifier</strong>
+          <span class="live-pill">Live Interactive Demo</span>
+        </div>
+        <p style="margin:0; font-size:13px; color:var(--ink-muted);" data-i18n="verifierSub">
+          Paste any sender email, website domain, RFQ reference, or job code to verify authenticity in 5 seconds before quoting or shipping goods:
+        </p>
+
+        <div class="verifier-input-row">
+          <input
+            type="text"
+            id="verify-input"
+            value="josephm@kcm-procurementdivision.com"
+            aria-label="Enter email address, domain, or RFQ number to verify"
+          />
+          <button type="button" class="btn btn-copper" id="btn-run-verify">Verify Now</button>
+        </div>
+
+        <div style="font-size:11.5px; color:var(--ink-muted); margin-bottom:6px; font-weight:600;">
+          Click any real-world test vector below:
+        </div>
+        <div class="chip-row">
+          <button type="button" class="chip chip-danger" data-sample="josephm@kcm-procurementdivision.com">⚠ Real Spoof: kcm-procurementdivision.com</button>
+          <button type="button" class="chip chip-danger" data-sample="NPA 00561/24">⚠ Forged RFQ: NPA 00561/24</button>
+          <button type="button" class="chip" data-sample="procurement@khoemacau.com">✓ Official: @khoemacau.com</button>
+          <button type="button" class="chip" data-sample="group@mmg.com">✓ Parent Group: @mmg.com</button>
+        </div>
+
+        <div id="verify-output" class="result-box fraud" role="status" aria-live="polite">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECTION 2: MARKET & COMPETITOR TEAR-DOWN -->
+  <section class="section section-alt" id="benchmark">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow" style="color:var(--copper);">Market &amp; Industry Competitive Intelligence</div>
+        <h2>How Khoemacau 2.0 Outcompetes Every Mining Peer in Botswana &amp; the Kalahari Copperbelt</h2>
+        <p>
+          Benchmarked directly against next-door Kalahari Copperbelt peer <strong>Sandfire Resources (Motheo Copper Operations, Ghanzi)</strong>, national leaders <strong>Debswana</strong> &amp; <strong>Lucara Botswana</strong>, <strong>Morupule Coal Mine</strong>, and parent group <strong>MMG Limited</strong>.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Strategic Digital &amp; Operational Capability</th>
+              <th>Khoemacau Current Site<br><span style="font-weight:400; color:#cbd5e1;">(Legacy WordPress Era)</span></th>
+              <th>Sandfire Motheo<br><span style="font-weight:400; color:#cbd5e1;">(Ghanzi Copper Peer)</span></th>
+              <th>Debswana / Lucara / MCM<br><span style="font-weight:400; color:#cbd5e1;">(National Benchmarks)</span></th>
+              <th class="col-win">Proposed Khoemacau 2.0<br><span style="font-weight:400;">(Press Cafe Architecture)</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Real-Time RFQ, PO &amp; Email Domain Spoof Verifier</strong><br><span style="color:var(--ink-muted); font-size:12px;">Stops syndicates like <code>kcm-procurementdivision.com</code> defrauding Batswana SMEs</span></td>
+              <td><span class="tag-no">✗ Static warning text only</span></td>
+              <td><span class="tag-no">✗ Static text disclaimer</span></td>
+              <td><span class="tag-part">◐ Whistleblowing hotline / PDF alerts</span></td>
+              <td class="col-win"><span class="tag-yes">✓ Instant 5-Sec Lookup + 1-Click Fraud Telemetry Capture (Zero ERP Exposure)</span></td>
+            </tr>
+            <tr>
+              <td><strong>2. Bilingual Setswana + English UX (<em>Puo ya Rona</em>)</strong><br><span style="color:var(--ink-muted); font-size:12px;">Essential for Toteng, Sehithwa, Somelo, Bodibeng, Kareng &amp; Maun communities</span></td>
+              <td><span class="tag-no">✗ English only</span></td>
+              <td><span class="tag-part">◐ English site + periodic translated PDFs</span></td>
+              <td><span class="tag-part">◐ Mostly English web pages</span></td>
+              <td class="col-win"><span class="tag-yes">✓ Native 1-Click English / Setswana Toggle across Community, Jobs &amp; CEEP</span></td>
+            </tr>
+            <tr>
+              <td><strong>3. Kalahari Rural 3G / Edge Speed (&lt;1.0s Load)</strong><br><span style="color:var(--ink-muted); font-size:12px;">Built for haulage drivers, community officers &amp; mobile applicants outside fibre zones</span></td>
+              <td><span class="tag-no">✗ Heavy CMS assets &amp; render-blocking scripts</span></td>
+              <td><span class="tag-part">◐ Modern ASX corporate media weight</span></td>
+              <td><span class="tag-no">✗ Heavy SharePoint / legacy enterprise portals</span></td>
+              <td class="col-win"><span class="tag-yes">✓ Sub-Second Edge CDN + Dedicated 1-Click Kalahari 3G Field Mode</span></td>
+            </tr>
+            <tr>
+              <td><strong>4. Citizen Economic Empowerment (CEEP) Self-Check</strong><br><span style="color:var(--ink-muted); font-size:12px;">Cuts incomplete supplier applications hitting Supply Chain</span></td>
+              <td><span class="tag-part">◐ Basic contact / static overview</span></td>
+              <td><span class="tag-part">◐ Local procurement overview</span></td>
+              <td><span class="tag-yes">✓ Structured CEEP rules (heavy UX)</span></td>
+              <td class="col-win"><span class="tag-yes">✓ Interactive 60-Second Vendor Readiness Scorer + Expansion EOI Categories</span></td>
+            </tr>
+            <tr>
+              <td><strong>5. Post-MMG 130ktpa Underground ESG Storytelling</strong><br><span style="color:var(--ink-muted); font-size:12px;">Highlights high-grade ~2% Cu underground low surface footprint vs open-pit peers</span></td>
+              <td><span class="tag-part">◐ Partially pre-expansion framing</span></td>
+              <td><span class="tag-yes">✓ Strong ASX sustainability hub</span></td>
+              <td><span class="tag-yes">✓ Strong annual CSI reporting</span></td>
+              <td class="col-win"><span class="tag-yes">✓ Interactive Zone 5 → Boseto → 130ktpa + MMG HKEX:1208 Governance Bridge</span></td>
+            </tr>
+            <tr>
+              <td><strong>6. Zero-PHP / Zero-Plugin Cybersecurity Posture</strong><br><span style="color:var(--ink-muted); font-size:12px;">Eliminates WordPress plugin exploits &amp; isolates internal mine networks 100%</span></td>
+              <td><span class="tag-no">✗ Traditional CMS surface</span></td>
+              <td><span class="tag-yes">✓ Hardened corporate hosting</span></td>
+              <td><span class="tag-yes">✓ Enterprise firewalling</span></td>
+              <td class="col-win"><span class="tag-yes">✓ Immutable Static/Edge Build + Strict CSP/HSTS + DMARC <code>p=reject</code> Defense</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: INTERACTIVE CEEP CITIZEN SUPPLIER READINESS SCORER -->
+  <section class="section" id="ceep">
+    <div class="container grid-2">
+      <div>
+        <div class="eyebrow" style="color:var(--copper);">130,000 tpa Expansion Local Content Engine</div>
+        <h2 data-i18n="ceepTitle">Citizen Economic Empowerment (CEEP) &amp; Ngamiland Supplier Readiness Hub</h2>
+        <p style="color:var(--ink-muted);" data-i18n="ceepLead">
+          Instead of flooding Khoemacau Supply Chain with incomplete PDF emails, local Batswana &amp; Ngamiland enterprises pre-check compliance in 60 seconds and route directly to the right procurement category:
+        </p>
+
+        <div id="ceep-checklist" style="margin-top:18px;">
+          <label class="checklist-item">
+            <input type="checkbox" class="ceep-box" checked />
+            <span><strong>1. CIPA Registration &amp; Citizen Shareholding Proof</strong> — Certified Omang copies of directors &amp; current CIPA extract showing Batswana citizen ownership / Ngamiland base.</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="ceep-box" checked />
+            <span><strong>2. Valid BURS Tax Clearance Certificate</strong> — Online verifiable BURS tax clearance status matching exact CIPA legal entity name.</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="ceep-box" />
+            <span><strong>3. Workers' Compensation &amp; Public Liability Insurance</strong> — Active statutory cover appropriate for site delivery or service category.</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="ceep-box" />
+            <span><strong>4. Baseline SHEQ File &amp; Zero-Harm Commitment</strong> — PPE compliance matrix, risk assessment template, and fitness-for-work readiness.</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="ceep-box" />
+            <span><strong>5. Stamped Bank Confirmation Letter &amp; Local Value-Addition Proof</strong> — Verifies genuine Botswana manufacturing, stockholding, or technical partnership.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card" style="align-self:start;">
+        <h3 style="margin-top:0;">Live Vendor Pre-Qualification Score</h3>
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <span style="font-size:13px; color:var(--ink-muted);">Compliance Readiness</span>
+          <strong id="ceep-score-label" style="font-size:24px; color:var(--copper);">40% — In Preparation</strong>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="ceep-bar"></div>
+        </div>
+        <p id="ceep-advice" style="font-size:13.5px; color:var(--ink-muted); margin-bottom:18px;">
+          Tick all 5 mandatory compliance items on the left to see how Khoemacau 2.0 guides citizen SMEs before they submit to Supply Chain.
+        </p>
+
+        <div style="border-top:1px solid var(--line); padding-top:16px;">
+          <strong style="font-size:13.5px; display:block; margin-bottom:8px;">Illustrative Expansion Category Windows [DEMO STRUCTURE]:</strong>
+          <div style="display:grid; gap:8px; font-size:13px;">
+            <div style="padding:9px 11px; background:#f8fafc; border-radius:8px; border:1px solid var(--line);">
+              <strong>Ngamiland Community Ring-Fenced:</strong> Camp catering produce, bush clearing, shuttle transport, laundry, facility maintenance &amp; heavy-duty entrance matting.
+            </div>
+            <div style="padding:9px 11px; background:#f8fafc; border-radius:8px; border:1px solid var(--line);">
+              <strong>National Citizen SME / JV:</strong> Flame-retardant &amp; high-vis PPE workwear, safety signage, civil engineering, solar/electrical balance-of-plant &amp; haulage.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: UNDERGROUND ADVANTAGE & MMG ALIGNMENT -->
+  <section class="section section-alt" id="operations">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow" style="color:var(--copper);">Differentiated ESG &amp; Technical Storytelling</div>
+        <h2>Turning Khoemacau's Underground Architecture into Southern Africa's #1 Mining Story</h2>
+        <p>
+          Open-pit copper mines leave vast surface pits. Khoemacau's mechanized underground Zone 5 orebody (~2.0% Cu — roughly double typical global copper head grades) delivers critical transition metal with a dramatically smaller surface footprint in Ngamiland.
+        </p>
+      </div>
+
+      <div class="flow-grid">
+        <div class="flow-step">
+          <div class="step-num">Stage 01 · Zone 5 Underground</div>
+          <h4>High-Grade Mechanized Stoping</h4>
+          <p>Twin-decline underground operation with modern ventilation, telemetry, and ~2.0% copper + silver ore grade.</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">Stage 02 · Boseto Concentrator</div>
+          <h4>Clean Sulfide Flotation</h4>
+          <p>Dedicated haul road transport to Boseto processing plant producing high-purity copper-silver concentrate.</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">Stage 03 · 130ktpa Expansion</div>
+          <h4>MMG Growth Investment</h4>
+          <p>Doubling long-term output across Zone 5 North, Zeta NE, Mango &amp; new concentrator capacity creating skilled Batswana careers.</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">Stage 04 · Ngamiland Stewardship</div>
+          <h4>Okavango Buffer &amp; Communities</h4>
+          <p>Located safely outside the Okavango Delta Ramsar core with measurable water recycling, solar integration &amp; village CSI.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: THREE-TIER COMMERCIAL PROPOSAL FOR KHOEMACAU EXECUTIVES -->
+  <section class="section" id="roadmap">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow" style="color:var(--copper);">Pragmatic Phased Commercial Engagement (100% Botswana Citizen Vendor)</div>
+        <h2>Start Small in 14 Days — Zero ERP Risk, Immediate Fraud Protection</h2>
+        <p>
+          Designed specifically so Corporate Affairs, Supply Chain &amp; IT at <strong>Icon Building, Plot 69184, Block 8, Gaborone</strong> can deploy immediate supplier protection without waiting on a multi-quarter group ERP project.
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card featured">
+          <span class="badge-copper" style="background:var(--copper); color:#fff;">Recommended Fast-Track Entry Wedge</span>
+          <h3 style="margin-top:10px;">Phase 1: Standalone Verify &amp; Anti-Fraud Portal</h3>
+          <div class="price-tag">P 48,000 – P 68,000</div>
+          <div style="font-size:12.5px; color:var(--ink-muted); margin-bottom:14px;">One-off setup (14 working days) + <strong>P 4,500 / mo</strong> managed edge SLA</div>
+          <ul style="padding-left:18px; font-size:13.5px; color:#334155; margin:0;">
+            <li>Live <code>verify.khoemacau.com</code> instant email domain, RFQ &amp; job-code checker</li>
+            <li>1-Click fraudulent PDF report capture routed to KCM Security/Supply Chain</li>
+            <li>DMARC <code>p=reject</code> &amp; lookalike-domain (<code>kcm-*</code>) defensive audit</li>
+            <li><strong>Zero connection to internal SAP/OT networks</strong> — zero cyber risk</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--ink-muted);">Flagship Corporate &amp; Expansion Platform</span>
+          <h3 style="margin-top:10px;">Phase 2: Complete <code>khoemacau.com</code> 2.0 Rebuild</h3>
+          <div class="price-tag">P 145,000 – P 225,000</div>
+          <div style="font-size:12.5px; color:var(--ink-muted); margin-bottom:14px;">6–8 week phased milestones + <strong>P 9,500 – P 14,500 / mo</strong> SLA</div>
+          <ul style="padding-left:18px; font-size:13.5px; color:#334155; margin:0;">
+            <li>Full Setswana + English bilingual Community, Careers &amp; CEEP Supplier Hub</li>
+            <li>Interactive 60-second Citizen Vendor Readiness Scorer &amp; EOI Board</li>
+            <li>130ktpa Expansion &amp; Underground ESG interactive storytelling aligned with MMG</li>
+            <li>Sub-second Kalahari 3G mobile performance + WCAG 2.2 AA compliance</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--ink-muted);">Physical + Digital CEEP Vendor Supply</span>
+          <h3 style="margin-top:10px;">Phase 3: SHEQ Visuals &amp; Mine-Spec Branding Supply</h3>
+          <div class="price-tag">On-Demand Quoted POs</div>
+          <div style="font-size:12.5px; color:var(--ink-muted); margin-bottom:14px;">Branding &amp; Decoration Botswana · 100% Citizen Supplier</div>
+          <ul style="padding-left:18px; font-size:13.5px; color:#334155; margin:0;">
+            <li>Heavy-duty industrial rubber/nitrile scraper &amp; custom logo entrance mats (Block 8 HQ, Boseto &amp; Maun offices)</li>
+            <li>Embroidered high-vis &amp; flame-retardant workwear, bush hats &amp; winter jackets</li>
+            <li>Safety milestone awards, reflective signage &amp; executive CSI merchandise</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container" style="display:flex; flex-wrap:wrap; gap:20px; justify-content:space-between; align-items:center;">
+      <div>
+        <strong style="color:#fff;">Independent Strategic Pitch Concept — Prepared by Press Cafe (Pty) Ltd &amp; Branding &amp; Decoration Botswana</strong><br />
+        Lead Architect &amp; Account Director: Farouk G. Pandor · Gaborone, Botswana · <code>presscafeworld@gmail.com</code><br />
+        <span style="font-size:12px;">Disclaimer: Independent concept demonstration created for executive evaluation by Khoemacau Copper Mining (Pty) Ltd. All sample tender records clearly marked as illustrative; forensic spoof domain evidence drawn from documented 2024–2026 Botswana supplier phishing incidents.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const verifyInput = document.getElementById("verify-input");
+      const verifyBtn = document.getElementById("btn-run-verify");
+      const verifyOut = document.getElementById("verify-output");
+
+      const KNOWN_SCAMS = [
+        {
+          match: "kcm-procurementdivision.com",
+          title: "CRITICAL FRAUD ALERT: Confirmed Spoofed Advance-Fee Scam Domain",
+          detail: "Forensic Match (Oct 2024, Mar–May 2025 & Jun 2026): Criminal syndicate impersonating Khoemacau's Block 8 Gaborone office using forged RFQ PDFs for non-existent 'STUTTGART ST2200' & 'BERMAIN XT 300' drill bits. DO NOT request quotes from suggested OEMs or pay deposits."
+        },
+        {
+          match: "npa 00561/24",
+          title: "CRITICAL FRAUD ALERT: Forged RFQ Reference Number (NPA 00561/24)",
+          detail: "Documented Fake Tender Match: Used on forged 'Khoemacau Copper Mining RFQ' PDFs soliciting 500x Stuttgart ST2200 drill bits. Khoemacau NEVER directs bidders to wire upfront deposits to unverified third-party tool distributors."
+        },
+        {
+          match: "bermain",
+          title: "CRITICAL FRAUD ALERT: Phantom Equipment Advance-Fee Trap ('BERMAIN XT 300')",
+          detail: "Classic two-sided procurement scam targeting Botswana SMEs. Cease communication immediately and forward the original email headers to Khoemacau Security."
+        },
+        {
+          match: "stuttgart st2200",
+          title: "CRITICAL FRAUD ALERT: Phantom Equipment Advance-Fee Trap ('STUTTGART ST2200')",
+          detail: "Classic two-sided procurement scam targeting Botswana SMEs. Cease communication immediately."
+        }
+      ];
+
+      function runVerification() {
+        const raw = (verifyInput.value || "").trim();
+        const q = raw.toLowerCase();
+
+        if (!q) {
+          verifyOut.className = "result-box caution";
+          verifyOut.innerHTML = "<strong>Enter an email address, domain, or RFQ reference above</strong> to run instant verification.";
+          return;
+        }
+
+        for (const scam of KNOWN_SCAMS) {
+          if (q.includes(scam.match)) {
+            verifyOut.className = "result-box fraud";
+            verifyOut.innerHTML =
+              "<strong>⛔ " + scam.title + "</strong>" +
+              "<p style='margin:6px 0 8px;'>" + scam.detail + "</p>" +
+              "<div style='font-size:12px; font-weight:700;'>Official Rule: Khoemacau Copper Mining emails ONLY originate from <code>@khoemacau.com</code> or parent group <code>@mmg.com</code> — never lookalike hyphenated domains.</div>";
+            return;
+          }
+        }
+
+        if (
+          q === "khoemacau.com" ||
+          q.endsWith("@khoemacau.com") ||
+          q === "mmg.com" ||
+          q.endsWith("@mmg.com")
+        ) {
+          verifyOut.className = "result-box valid";
+          verifyOut.innerHTML =
+            "<strong>✓ VERIFIED OFFICIAL CORPORATE DOMAIN (" + raw.replace(/</g, "&lt;") + ")</strong>" +
+            "<p style='margin:6px 0 0;'>This domain belongs to authentic Khoemacau Copper Mining (<code>@khoemacau.com</code>) / MMG Limited (<code>@mmg.com</code>) infrastructure. Always confirm envelope sender headers (DKIM/DMARC) and never pay recruitment or tender participation fees.</p>";
+          return;
+        }
+
+        if (q.includes("@gmail.") || q.includes("@yahoo.") || q.includes("@outlook.") || q.includes("@hotmail.") || q.includes("kcm") || q.includes("khoemacau")) {
+          verifyOut.className = "result-box fraud";
+          verifyOut.innerHTML =
+            "<strong>⛔ UNVERIFIED / SUSPICIOUS IMPERSONATION RISK (" + raw.replace(/</g, "&lt;") + ")</strong>" +
+            "<p style='margin:6px 0 0;'>Khoemacau Copper Mining NEVER issues RFQs, Purchase Orders, or job offers from free webmail addresses (Gmail/Yahoo/Outlook) or hyphenated lookalike domains containing 'kcm' or 'khoemacau'. Treat as fraudulent until verified directly with Corporate Office (Block 8, Gaborone).</p>";
+          return;
+        }
+
+        verifyOut.className = "result-box caution";
+        verifyOut.innerHTML =
+          "<strong>⚠ NOT FOUND IN PUBLIC OPEN TENDER MANIFEST (" + raw.replace(/</g, "&lt;") + ")</strong>" +
+          "<p style='margin:6px 0 0;'>In production on <code>verify.khoemacau.com</code>, this lookup checks Khoemacau's signed daily read-only manifest of active public RFQ numbers and official job codes without exposing internal SAP systems.</p>";
+      }
+
+      verifyBtn.addEventListener("click", runVerification);
+      verifyInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") runVerification();
+      });
+
+      document.querySelectorAll("[data-sample]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          verifyInput.value = btn.getAttribute("data-sample");
+          runVerification();
+        });
+      });
+
+      runVerification();
+
+      // Interactive CEEP Readiness Checklist
+      const boxes = Array.from(document.querySelectorAll(".ceep-box"));
+      const bar = document.getElementById("ceep-bar");
+      const scoreLabel = document.getElementById("ceep-score-label");
+      const advice = document.getElementById("ceep-advice");
+
+      function updateCeep() {
+        const checked = boxes.filter(function (b) { return b.checked; }).length;
+        const pct = Math.round((checked / boxes.length) * 100);
+        bar.style.width = pct + "%";
+        if (pct === 100) {
+          scoreLabel.textContent = "100% — KCM Vendor Pre-Qualification Ready ✓";
+          scoreLabel.style.color = "var(--emerald)";
+          advice.textContent = "All 5 statutory & SHEQ pre-checks complete! Ready to submit clean single-PDF vendor dossier to Khoemacau Local Procurement.";
+        } else {
+          scoreLabel.textContent = pct + "% — " + (5 - checked) + " Item(s) Remaining";
+          scoreLabel.style.color = "var(--copper)";
+          advice.textContent = "Complete the remaining unchecked compliance documents before submitting so your citizen enterprise passes first-time screening.";
+        }
+      }
+      boxes.forEach(function (b) { b.addEventListener("change", updateCeep); });
+      updateCeep();
+
+      // Live English / Setswana Bilingual Toggle
+      const I18N = {
+        en: {
+          navSub: "Kalahari Copperbelt · Ngamiland & Gaborone, Botswana · Aligned with MMG (HKEX: 1208)",
+          heroEyebrow: "Kalahari Copperbelt Flagship · High-Grade Underground Copper & Silver",
+          heroTitle: "Powering the Global Energy Transition from the Heart of Ngamiland, Botswana.",
+          heroLead: "Designed to outcompete every regional mining peer on cyber trust, rural 3G mobile speed (<1.0s), Setswana/English accessibility, and Citizen Economic Empowerment — while eliminating fake-tender fraud targeting Batswana businesses.",
+          ctaSupplier: "Citizen Supplier Portal (CEEP) →",
+          ctaBenchmark: "View Sandfire / Debswana Benchmark",
+          verifierSub: "Paste any sender email, website domain, RFQ reference, or job code to verify authenticity in 5 seconds before quoting or shipping goods:",
+          ceepTitle: "Citizen Economic Empowerment (CEEP) & Ngamiland Supplier Readiness Hub",
+          ceepLead: "Instead of flooding Khoemacau Supply Chain with incomplete PDF emails, local Batswana & Ngamiland enterprises pre-check compliance in 60 seconds and route directly to the right procurement category:"
+        },
+        tn: {
+          navSub: "Kalahari Copperbelt · Ngamiland le Gaborone, Botswana · Lekalana la MMG (HKEX: 1208)",
+          heroEyebrow: "Moepo wa Kopore le Selefera ka fa Tlase ga Lefatshe · Kgaolo ya Ngamiland",
+          heroTitle: "Re Tshegetsa Diphetogo tsa Motlakase Lefatsheng go Tswa mo Pelong ya Ngamiland, Botswana.",
+          heroLead: "E diretswe go sireletsa bagwebi ba Batswana le baikopedi ba ditiro mo borukhutlhing jwa dithendara tsa maaka, ka lebelo la selefouno ya 3G (<1.0s) kwa Toteng, Sehithwa le Maun, ka Setswana le Sekgoa.",
+          ctaSupplier: "Tsela ya Bagwebi ba Batswana (CEEP) →",
+          ctaBenchmark: "Bapisa le Meepo e Mengwe",
+          verifierSub: "Tsenya aterese ya imeile, leina la maranyane (domain), kgotsa nomoro ya thendara (RFQ) go tlhomamisa boammaaruri ka metsotswana e le 5 pele o romela ditlhwatlhwa:",
+          ceepTitle: "Tikwatikwe ya Nonotsho ya Bagwebi ba Batswana (CEEP) le Metse ya Ngamiland",
+          ceepLead: "Bagwebi ba Batswana ba tlhola ditlankana tsa bone (CIPA, BURS, Inshorense le SHEQ) ka motsotswana pele ba ikwadisa le Khoemacau:"
+        }
+      };
+
+      let lang = "en";
+      const btnLang = document.getElementById("btn-lang");
+      btnLang.addEventListener("click", function () {
+        lang = lang === "en" ? "tn" : "en";
+        btnLang.textContent = lang === "tn" ? "Setswana / English: TN ✓" : "Setswana / English: EN";
+        btnLang.setAttribute("aria-pressed", String(lang === "tn"));
+        const dict = I18N[lang];
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          const k = el.getAttribute("data-i18n");
+          if (dict[k]) el.textContent = dict[k];
+        });
+      });
+
+      // Kalahari 3G Field Mode Toggle
+      const btn3g = document.getElementById("btn-3g");
+      btn3g.addEventListener("click", function () {
+        const active = document.body.classList.toggle("field-3g");
+        btn3g.textContent = active ? "Kalahari 3G Mode: ON ⚡" : "Kalahari 3G Mode: OFF";
+        btn3g.setAttribute("aria-pressed", String(active));
+      });
+    })();
+  </script>
+</body>
+</html>

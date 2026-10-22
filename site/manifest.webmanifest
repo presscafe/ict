@@ -1,0 +1,10 @@
+{
+  "name": "Press Cafe & Farouk Pandor — Command & Paper-to-Plan Studio",
+  "short_name": "PressCafe OS",
+  "description": "Offline-first commercial operating studio: handwritten paper-task intake, ZAR-to-BWP landed quote calculator, and cross-repository production readiness.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#1f4d3a",
+  "icons": []
+}

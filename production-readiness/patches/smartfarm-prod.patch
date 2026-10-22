@@ -1,0 +1,226 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..b518b92
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,4 @@
++node_modules/
++dist/
++*.local
++.DS_Store
+diff --git a/public/sw.js b/public/sw.js
+new file mode 100644
+index 0000000..760f909
+--- /dev/null
++++ b/public/sw.js
+@@ -0,0 +1,20 @@
++const CACHE = "smartfarm-offline-v1";
++const CORE = ["./", "./index.html"];
++self.addEventListener("install", (e) => {
++  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)));
++  self.skipWaiting();
++});
++self.addEventListener("activate", (e) => {
++  e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))));
++  self.clients.claim();
++});
++self.addEventListener("fetch", (e) => {
++  if (e.request.method !== "GET") return;
++  e.respondWith(
++    caches.match(e.request).then((hit) => hit || fetch(e.request).then((res) => {
++      const copy = res.clone();
++      caches.open(CACHE).then((c) => c.put(e.request, copy));
++      return res;
++    }))
++  );
++});
+diff --git a/src/App.tsx b/src/App.tsx
+index ac52e21..4547ea4 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
+ import { farmRepository } from "./repositories/farmRepository";
+ import type { Farm } from "./domain/farm";
+ 
+-type Module = "Overview" | "Crops" | "Livestock" | "Inventory" | "Tasks" | "Finance";
+-const modules: Module[] = ["Overview", "Crops", "Livestock", "Inventory", "Tasks", "Finance"];
++type Module = "Overview" | "Livestock" | "Crops" | "Inventory" | "Tasks" | "Finance";
++const modules: Module[] = ["Overview", "Livestock", "Crops", "Inventory", "Tasks", "Finance"];
+ 
+ function App() {
+   const [active, setActive] = useState<Module>("Overview");
+@@ -14,6 +14,15 @@ function App() {
+   const [location, setLocation] = useState("");
+   const [error, setError] = useState("");
+ 
++  // Non-ruminant / broiler batch economics calculator (BWP)
++  const [birdsPlaced, setBirdsPlaced] = useState(500);
++  const [mortalityPct, setMortalityPct] = useState(4.5);
++  const [liveWeightKg, setLiveWeightKg] = useState(2.1);
++  const [feedBags50kg, setFeedBags50kg] = useState(38);
++  const [bagPriceBwp, setBagPriceBwp] = useState(385);
++  const [chickAndMedsBwp, setChickAndMedsBwp] = useState(6500);
++  const [sellPricePerBirdBwp, setSellPricePerBirdBwp] = useState(72);
++
+   const loadFarms = async () => setFarms(await farmRepository.list());
+   useEffect(() => { void loadFarms(); }, []);
+ 
+@@ -30,23 +39,119 @@ function App() {
+     }
+   };
+ 
++  const exportBackup = () => {
++    const payload = JSON.stringify({ exportedAt: new Date().toISOString(), farms }, null, 2);
++    const blob = new Blob([payload], { type: "application/json" });
++    const url = URL.createObjectURL(blob);
++    const a = document.createElement("a");
++    a.href = url;
++    a.download = `smartfarm-backup-${new Date().toISOString().slice(0, 10)}.json`;
++    a.click();
++    URL.revokeObjectURL(url);
++  };
++
++  const birdsSold = Math.max(0, Math.round(birdsPlaced * (1 - mortalityPct / 100)));
++  const totalFeedKg = feedBags50kg * 50;
++  const totalLiveKg = birdsSold * liveWeightKg;
++  const fcr = totalLiveKg > 0 ? totalFeedKg / totalLiveKg : 0;
++  const totalFeedCost = feedBags50kg * bagPriceBwp;
++  const totalDirectCost = totalFeedCost + chickAndMedsBwp;
++  const grossRevenue = birdsSold * sellPricePerBirdBwp;
++  const netMargin = grossRevenue - totalDirectCost;
++
+   const currentFarm = farms[0];
+   return (
+     <main className="app-shell">
+-      <header className="topbar"><div><p className="eyebrow">CLIMATE-RESILIENT FARM OPERATIONS</p><h1>SmartFarm</h1><p className="subtitle">Operational truth first. Intelligence second.</p></div><span className="offline-badge">● Offline ready</span></header>
++      <header className="topbar">
++        <div>
++          <p className="eyebrow">CLIMATE-RESILIENT FARM OPERATIONS · BOTSWANA</p>
++          <h1>SmartFarm</h1>
++          <p className="subtitle">Operational truth first. Local IndexedDB + offline service worker.</p>
++        </div>
++        <span className="offline-badge">● Offline PWA active</span>
++      </header>
++
+       <nav className="module-nav" aria-label="Farm modules">
+-        {modules.map((module) => <button key={module} className={active === module ? "nav-button active" : "nav-button"} onClick={() => setActive(module)}>{module}</button>)}
++        {modules.map((module) => (
++          <button key={module} className={active === module ? "nav-button active" : "nav-button"} onClick={() => setActive(module)}>
++            {module}
++          </button>
++        ))}
+       </nav>
+-      {active === "Overview" ? (
++
++      {active === "Overview" && (
+         <>
+-          <section className="hero"><div><p className="eyebrow">FARM CONTROL CENTRE</p><h2>{currentFarm ? currentFarm.name : "Build a reliable farm record before adding automation."}</h2><p>{currentFarm ? currentFarm.location + " · Owner: " + currentFarm.ownerName : "Record production, livestock, inputs, work and money locally, then export or synchronise later."}</p></div><button className="primary" onClick={() => setShowSetup(true)}>Create farm</button></section>
++          <section className="hero">
++            <div>
++              <p className="eyebrow">FARM CONTROL CENTRE</p>
++              <h2>{currentFarm ? currentFarm.name : "Build a reliable farm record before adding automation."}</h2>
++              <p>{currentFarm ? `${currentFarm.location} · Manager: ${currentFarm.ownerName}` : "Record production, poultry batches, feed FCR, and margin locally on device — then export JSON backups anytime."}</p>
++              <div className="action-row">
++                <button className="primary" onClick={() => setShowSetup(true)}>{currentFarm ? "Add another farm" : "Create farm"}</button>
++                <button className="secondary" onClick={exportBackup}>Export local JSON backup</button>
++                <button className="secondary" onClick={() => setActive("Livestock")}>Open Poultry FCR &amp; Margin Desk →</button>
++              </div>
++            </div>
++          </section>
+           <section className="cards" aria-label="Farm summary">
+-            {[["Registered farms", String(farms.length), "Stored locally"],["Active crop cycles","0","Ready for production records"],["Open tasks","0","Nothing overdue"],["Inventory items","0","Local-first ledger"]].map(([label,value,note]) => <article className="card" key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></article>)}
++            {[
++              ["Registered farms", String(farms.length), "Stored locally in IndexedDB"],
++              ["Modelled batch FCR", fcr.toFixed(2), `${birdsSold} birds finished (${totalFeedKg.toLocaleString()} kg feed)`],
++              ["Modelled batch margin", `P${Math.round(netMargin).toLocaleString()}`, `Revenue P${Math.round(grossRevenue).toLocaleString()} vs Cost P${Math.round(totalDirectCost).toLocaleString()}`],
++              ["Offline status", "Active", "Zero cloud fees required"]
++            ].map(([label, value, note]) => (
++              <article className="card" key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></article>
++            ))}
+           </section>
+-          <section className="panel"><div><p className="eyebrow">NEXT ACTION</p><h3>{currentFarm ? "Farm foundation saved locally" : "Set up your first farm"}</h3><p>Start with the farm profile. Fields, enterprises, water, crops, livestock and finance will build on this foundation.</p></div><button className="secondary" onClick={() => setShowSetup(true)}>{currentFarm ? "Add farm" : "Open setup"}</button></section>
+-          {showSetup && <section className="panel" aria-label="Farm setup"><p className="eyebrow">FARM SETUP</p><h3>Create a local farm record</h3><form onSubmit={createFarm} className="setup-form"><label>Farm name<input value={name} onChange={(e) => setName(e.target.value)} required /></label><label>Owner / manager<input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} required /></label><label>Location<input value={location} onChange={(e) => setLocation(e.target.value)} required /></label>{error && <p role="alert">{error}</p>}<div><button type="submit" className="primary">Save locally</button><button type="button" className="secondary" onClick={() => setShowSetup(false)}>Cancel</button></div></form></section>}
++          {showSetup && (
++            <section className="panel" aria-label="Farm setup">
++              <p className="eyebrow">FARM SETUP</p>
++              <h3>Create a local farm record</h3>
++              <form onSubmit={createFarm} className="setup-form">
++                <label>Farm name<input value={name} onChange={(e) => setName(e.target.value)} required /></label>
++                <label>Owner / manager<input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} required /></label>
++                <label>District / village<input value={location} onChange={(e) => setLocation(e.target.value)} required /></label>
++                {error && <p role="alert">{error}</p>}
++                <div className="action-row">
++                  <button type="submit" className="primary">Save locally</button>
++                  <button type="button" className="secondary" onClick={() => setShowSetup(false)}>Cancel</button>
++                </div>
++              </form>
++            </section>
++          )}
+         </>
+-      ) : <section className="panel module-placeholder"><p className="eyebrow">{active.toUpperCase()}</p><h2>{active} module</h2><p>This module is intentionally being built on the shared SmartFarm data model.</p></section>}
++      )}
++
++      {active === "Livestock" && (
++        <section className="panel">
++          <p className="eyebrow">NON-RUMINANT / POULTRY BATCH BENCHMARK</p>
++          <h2>Broiler / Layer Feed Conversion (FCR) &amp; Gross Margin Calculator (BWP)</h2>
++          <p>Verify feed cost per bird, mortality sensitivity, and net Pula margin before committing capital to a batch.</p>
++          <div className="calc-grid">
++            <label>Day-old chicks placed<input type="number" min={1} value={birdsPlaced} onChange={(e) => setBirdsPlaced(Number(e.target.value) || 0)} /></label>
++            <label>Mortality (%)<input type="number" step="0.5" min={0} max={100} value={mortalityPct} onChange={(e) => setMortalityPct(Number(e.target.value) || 0)} /></label>
++            <label>Target live weight (kg/bird)<input type="number" step="0.1" min={0.1} value={liveWeightKg} onChange={(e) => setLiveWeightKg(Number(e.target.value) || 0)} /></label>
++            <label>50 kg feed bags used<input type="number" min={1} value={feedBags50kg} onChange={(e) => setFeedBags50kg(Number(e.target.value) || 0)} /></label>
++            <label>Price per 50 kg bag (Pula)<input type="number" min={1} value={bagPriceBwp} onChange={(e) => setBagPriceBwp(Number(e.target.value) || 0)} /></label>
++            <label>Chicks + vaccines + litter + gas (Pula)<input type="number" min={0} value={chickAndMedsBwp} onChange={(e) => setChickAndMedsBwp(Number(e.target.value) || 0)} /></label>
++            <label>Target selling price / bird (Pula)<input type="number" min={1} value={sellPricePerBirdBwp} onChange={(e) => setSellPricePerBirdBwp(Number(e.target.value) || 0)} /></label>
++          </div>
++          <section className="cards">
++            <article className="card"><span>Marketable birds</span><strong>{birdsSold.toLocaleString()}</strong><small>{birdsPlaced - birdsSold} mortalities modelled</small></article>
++            <article className="card"><span>Feed Conversion Ratio (FCR)</span><strong>{fcr.toFixed(2)}</strong><small>{fcr <= 1.85 ? "Strong efficiency target" : "Review feed wastage / ration quality"}</small></article>
++            <article className="card"><span>Break-even per bird</span><strong>P{birdsSold > 0 ? (totalDirectCost / birdsSold).toFixed(2) : "0.00"}</strong><small>Feed share: {totalDirectCost > 0 ? Math.round((totalFeedCost / totalDirectCost) * 100) : 0}% of direct cost</small></article>
++            <article className="card"><span>Projected net margin</span><strong>P{Math.round(netMargin).toLocaleString()}</strong><small>P{birdsSold > 0 ? (netMargin / birdsSold).toFixed(2) : "0.00"} per bird sold</small></article>
++          </section>
++        </section>
++      )}
++
++      {active !== "Overview" && active !== "Livestock" && (
++        <section className="panel module-placeholder">
++          <p className="eyebrow">{active.toUpperCase()} ROADMAP STAGE</p>
++          <h2>{active} ledger</h2>
++          <p>Scheduled after paid pilot farm validation. Export JSON backups from Overview to preserve local records.</p>
++        </section>
++      )}
+     </main>
+   );
+ }
+diff --git a/src/index.css b/src/index.css
+index b86494d..40a68a5 100644
+--- a/src/index.css
++++ b/src/index.css
+@@ -1,5 +1,3 @@
+-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+-
+ :root {
+   font-family: Inter, system-ui, sans-serif;
+   color: #17231d;
+@@ -47,3 +45,8 @@ h3 { margin: 4px 0 8px; font-size: 1.35rem; }
+ @media (max-width: 480px) {
+   .cards { grid-template-columns: 1fr; }
+ }
++
++.calc-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin: 1rem 0; }
++.calc-grid label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem; font-weight: 600; }
++.calc-grid input { padding: 0.55rem 0.7rem; border: 1px solid #cbd5cc; border-radius: 8px; font-size: 1rem; }
++.action-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+diff --git a/src/main.tsx b/src/main.tsx
+index c2a145c..4247ae0 100644
+--- a/src/main.tsx
++++ b/src/main.tsx
+@@ -8,3 +8,7 @@ createRoot(document.getElementById("root")!).render(
+     <App />
+   </StrictMode>,
+ );
++
++if ("serviceWorker" in navigator) {
++  window.addEventListener("load", () => { navigator.serviceWorker.register("./sw.js").catch(() => {}); });
++}
