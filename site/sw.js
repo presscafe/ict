@@ -1,7 +1,8 @@
-const CACHE = "presscafe-command-studio-v2";
+const CACHE = "presscafe-command-studio-v3";
 const ASSETS = [
   "./",
   "./index.html",
+  "./khoemacau-pitch/index.html",
   "./manifest.webmanifest",
   "./assets/styles.css",
   "./assets/app.js",

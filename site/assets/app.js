@@ -125,6 +125,21 @@ const DEAL_PRESETS = [
     lead: "Immediate digital model + scheduled on-farm house inspection prior to integrator submission"
   },
   {
+    id: "pitch01_khoemacau_wedge",
+    label: "PITCH-01 · Khoemacau Phase 1 Anti-Fraud Verify Portal Wedge",
+    item: "Standalone Official RFQ, Domain & Recruitment Anti-Fraud Micro-Portal (verify.khoemacau.com) + Lookalike Domain Defensive Audit (Zero ERP Exposure)",
+    supplier: "Press Cafe (Pty) Ltd Engineering + Specialist Security Review Partner",
+    qty: 1,
+    zar: 18500,
+    fx: 1.0,
+    freight: 0,
+    decor: 0,
+    setup: 9500,
+    margin: 48,
+    courier: 0,
+    lead: "14 working days from stakeholder sign-off (+ P4,500/mo managed edge SLA)"
+  },
+  {
     id: "pre21_workwear",
     label: "PRE-21A · 50× Reflective Conti Suits (Sweet-Orr)",
     item: "2-Piece Polycotton Conti Suit with Reflective Tape + Left-Chest Embroidery",
