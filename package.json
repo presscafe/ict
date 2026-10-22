@@ -1,0 +1,15 @@
+{
+  "name": "presscafe-ict-command-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Zero-burn offline-first commercial operating studio, B&D Botswana hardened quote storefront preview, and cross-portfolio production readiness suite.",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node scripts/verify-production.mjs",
+    "verify": "node scripts/verify-production.mjs"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

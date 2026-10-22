@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Press Cafe &amp; Farouk Pandor — Command &amp; Paper-to-Plan Studio</title>
+  <meta name="description" content="Offline-first commercial operating system: handwritten paper-notes intake, ZAR-to-BWP landed quote calculator, and cross-portfolio repository production readiness." />
+  <meta name="theme-color" content="#1f4d3a" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="truth-strip">
+    <div class="wrap truth-strip-inner">
+      <span><strong>Master Operating Standard v5.0:</strong> Verified Cash Received = <strong>P0</strong> · Cloud Burn = <strong>P0/mo</strong> · Priority #1 = <strong>Paid Commercial Quotes</strong></span>
+      <span>Offline-First Local Studio · Zero Data Sent to Any Server</span>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap">
+      <div class="header-inner">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">PC</div>
+          <div>
+            <h1 class="brand-title">Press Cafe &amp; Farouk Pandor — Command Studio</h1>
+            <p class="brand-sub">Goal → Paper Idea → Evidence → Score → Decide → Quote → Cash (Botswana BWP)</p>
+          </div>
+        </div>
+        <div class="header-actions no-print">
+          <a class="btn btn-soft" href="bdb-store/index.html">Launch Fixed B&amp;D Storefront →</a>
+          <button type="button" class="btn" id="btn-export-all">Export Studio JSON</button>
+        </div>
+      </div>
+
+      <nav class="tab-bar no-print" role="tablist" aria-label="Operating studio views">
+        <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="paper">1. Handwritten Paper Notes → Plan</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="deal">2. Deal &amp; ZAR→BWP Quote Desk (PRE-49)</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="repos">3. Repo &amp; Vercel Production Matrix</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="plan30">4. 30-Day Revenue Checklist</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="kpi-grid" aria-label="Portfolio operating pulse">
+      <article class="kpi-card">
+        <div class="kpi-eyebrow">Active Live RFQ (PRE-49)</div>
+        <div class="kpi-value">1600 × 900 mm</div>
+        <p class="kpi-note">Rubber Door Mat (Black/Grey) · 6 Gmail drafts staged &amp; ready</p>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-eyebrow">Paper Scribbles Captured</div>
+        <div class="kpi-value" id="kpi-paper-count">0 items</div>
+        <p class="kpi-note" id="kpi-paper-top">Paste raw notebook lines below or send photos in chat</p>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-eyebrow">Production Patches Verified</div>
+        <div class="kpi-value">5 / 5 GREEN</div>
+        <p class="kpi-note">BDB Storefront · Morua · Portfolio · SmartFarm · CNS Starter</p>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-eyebrow">30-Day Execution Progress</div>
+        <div class="kpi-value" id="kpi-check-progress">0 / 12</div>
+        <p class="kpi-note">Target: Close first paid BWP orders with 100% prepay before delivery</p>
+      </article>
+    </section>
+
+    <!-- TAB 1: HANDWRITTEN PAPER TASKS STUDIO -->
+    <section id="tab-paper" class="tab-view">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Step 1 · Capture Without Friction</p>
+            <h2>Handwritten Paper Tasks → Structured Venture &amp; Priority Studio</h2>
+            <p class="lead">
+              Drop raw lines straight off your paper notebooks (one line per thought — messy shorthand is welcome), set <strong>what you personally want</strong> on each idea, and compare against the <strong>Master Prompt v5.0 commercial score</strong>. Or simply upload phone photos of your handwritten pages directly in Arena chat!
+            </p>
+          </div>
+          <div class="btn-row no-print" style="margin-top:0">
+            <button type="button" class="btn btn-soft" id="btn-load-examples">Load Sample Paper Notes</button>
+            <button type="button" class="btn btn-primary" id="btn-copy-arena">Copy Structured Brief for Arena Chat</button>
+          </div>
+        </div>
+
+        <div class="callout callout-green">
+          <strong>Anti-Sprawl Guarantee:</strong> Every handwritten idea routes into one of your <strong>existing 6 enterprise lanes</strong> (<code>ENT-01 B&amp;D Botswana</code>, <code>ENT-02 Morua / Commerce</code>, <code>ENT-03 SmartFarm / Animal Science</code>, <code>ENT-04 Consulting</code>, <code>ENT-05 Estates</code>, or <code>Someday Vault</code>) so you never drown in Repo #233.
+        </div>
+
+        <div class="field">
+          <label for="paper-dump">Paste or dictate raw lines from your paper pages (one note per line):</label>
+          <textarea id="paper-dump" rows="5" placeholder="Example lines from paper:&#10;Follow up rubber door mat 1600x900 black or grey + get Branded Mats SA trade price&#10;School tracksuits & golf shirts January term Southern District&#10;Broiler feed & mortality sheet for smallholder farmers around Goodhope&#10;Clean up broken links on faroukpandor.github.io portfolio page&#10;Future idea: automated tender alert bot for Botswana government gazettes"></textarea>
+        </div>
+        <div class="btn-row no-print">
+          <button type="button" class="btn btn-primary" id="btn-parse-notes">Add &amp; Score Lines →</button>
+          <button type="button" class="btn" id="btn-export-csv">Export CSV for Linear</button>
+          <button type="button" class="btn" id="btn-print-notes">Print Clean Dossier</button>
+          <button type="button" class="btn" id="btn-clear-notes">Reset List</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Step 2 · Co-Design: What Farouk Wants × What Pays Fastest</p>
+            <h2>Ranked Paper Backlog (<span id="notes-count-inline">0</span> items)</h2>
+          </div>
+        </div>
+        <div id="notes-container" class="note-list"></div>
+      </div>
+    </section>
+
+    <!-- TAB 2: DEAL & LANDED QUOTE DESK -->
+    <section id="tab-deal" class="tab-view" hidden>
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Live Commercial Desk · Zero Stale Costs Allowed</p>
+            <h2>ZAR Trade → Botswana Landed Cost &amp; Formal Quote Generator</h2>
+            <p class="lead">
+              Pre-configured for <strong>PRE-49 (1600 × 900 mm Heavy-Duty Rubber Door Mat)</strong> plus the 4 <strong>PRE-21</strong> benchmark jobs. Client names and WhatsApp digits stay strictly inside your browser session — never stored in Git.
+            </p>
+          </div>
+        </div>
+
+        <div class="filter-row no-print" id="deal-presets"></div>
+
+        <div class="two-col">
+          <div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="d-item">Item / Specification</label>
+                <input type="text" id="d-item" value="Heavy-Duty Commercial Rubber Door Mat — 1600 × 900 mm (Black / Grey)" />
+              </div>
+              <div class="field">
+                <label for="d-supplier">Verified Supplier Source</label>
+                <input type="text" id="d-supplier" value="Branded Mats SA / Perkal (Oct 2026 Trade Quote)" />
+              </div>
+              <div class="field">
+                <label for="d-qty">Quantity (units)</label>
+                <input type="number" id="d-qty" min="1" step="1" value="2" />
+              </div>
+              <div class="field">
+                <label for="d-zar">Supplier Unit Cost (ZAR ex-VAT)</label>
+                <input type="number" id="d-zar" min="0" step="10" value="950" />
+                <small>Replace with confirmed Oct 2026 written trade quote</small>
+              </div>
+              <div class="field">
+                <label for="d-fx">ZAR → BWP Rate (1 ZAR in Pula)</label>
+                <input type="number" id="d-fx" min="0.1" step="0.01" value="0.77" />
+                <small>Include bank FX spread + cross-border transfer buffer</small>
+              </div>
+              <div class="field">
+                <label for="d-freight">SA→BW Freight &amp; Clearing Total (Pula)</label>
+                <input type="number" id="d-freight" min="0" step="25" value="380" />
+                <small>Total batch cross-border courier / border clearing into BW</small>
+              </div>
+              <div class="field">
+                <label for="d-decor">Local Branding / Inlay per Unit (Pula)</label>
+                <input type="number" id="d-decor" min="0" step="10" value="0" />
+              </div>
+              <div class="field">
+                <label for="d-setup">Once-Off Artwork / Setup Fee (Pula)</label>
+                <input type="number" id="d-setup" min="0" step="25" value="0" />
+              </div>
+              <div class="field">
+                <label for="d-margin">Target Gross Margin (%)</label>
+                <input type="number" id="d-margin" min="5" max="85" step="1" value="38" />
+                <small>Minimum floor: 28% gross margin</small>
+              </div>
+              <div class="field">
+                <label for="d-courier">BW Client Delivery Courier Fee (Pula)</label>
+                <input type="number" id="d-courier" min="0" step="20" value="220" />
+                <small>Billed for client's account (0 = client collects / TBD)</small>
+              </div>
+              <div class="field">
+                <label for="d-lead">Confirmed Lead Time</label>
+                <input type="text" id="d-lead" value="7–10 working days from payment & artwork sign-off" />
+              </div>
+              <div class="field">
+                <label for="d-vat">VAT Mode</label>
+                <select id="d-vat">
+                  <option value="0" selected>Not VAT-charged (0% — clean net quote)</option>
+                  <option value="0.14">Botswana Standard VAT (14%)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="d-client">Client Name / Company (Browser Only)</label>
+                <input type="text" id="d-client" placeholder="e.g. Client Procurement Contact" />
+              </div>
+              <div class="field">
+                <label for="d-phone">Client WhatsApp Digits (Optional, Browser Only)</label>
+                <input type="text" id="d-phone" placeholder="e.g. 2677XXXXXXX (no + or spaces)" />
+              </div>
+            </div>
+
+            <h3 style="margin-top:1.25rem">Mandatory Owner Pre-Quote Safety Gates</h3>
+            <div class="gate-list">
+              <label class="gate-item"><input type="checkbox" id="g-dim" /> <span><strong>Dimensions / Sizes Confirmed:</strong> Exact L × W (e.g. <code>1600 × 900 mm</code>) or garment size curve confirmed in writing by client.</span></label>
+              <label class="gate-item"><input type="checkbox" id="g-art" /> <span><strong>Artwork Checked:</strong> Vector logo file (<code>PDF/AI/EPS/SVG</code>) reviewed OR plain unbranded spec explicitly confirmed.</span></label>
+              <label class="gate-item"><input type="checkbox" id="g-cost" /> <span><strong>Fresh Oct/Nov 2026 Cost Verified:</strong> Anchored to written current supplier quote — <strong>zero stale March figures</strong>.</span></label>
+              <label class="gate-item"><input type="checkbox" id="g-terms" checked /> <span><strong>Press Cafe Payment &amp; Delivery Rule Stated:</strong> <strong>100% payment before dispatch/delivery</strong>; nationwide Botswana delivery at client's cost.</span></label>
+            </div>
+          </div>
+
+          <div>
+            <div id="deal-alert"></div>
+            <table class="summary-table" id="deal-summary-table"></table>
+
+            <h3 style="margin-top:1.15rem">Generated Client Message (Auto-switches between Spec Check &amp; Firm Quote)</h3>
+            <pre class="preview-box" id="deal-message-preview"></pre>
+            <div class="btn-row no-print">
+              <button type="button" class="btn btn-primary" id="btn-copy-quote">Copy Message</button>
+              <button type="button" class="btn btn-soft" id="btn-wa-quote">Open in WhatsApp →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: REPO PRODUCTION MATRIX -->
+    <section id="tab-repos" class="tab-view" hidden>
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Empirical Build &amp; Security Audit · 232 GitHub Repos + 15 Vercel Projects</p>
+            <h2>Cross-Portfolio Production Readiness Center</h2>
+            <p class="lead">
+              Every active codebase was compiled and inspected line-by-line. Five verified git patches sit ready in <code>production-readiness/patches/</code>, and client repositories remain strictly hands-off.
+            </p>
+          </div>
+        </div>
+        <div class="filter-row no-print" id="repo-filters"></div>
+        <div style="overflow-x:auto">
+          <table class="summary-table" id="repo-table"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: 30-DAY EXECUTION CHECKLIST -->
+    <section id="tab-plan30" class="tab-view" hidden>
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">22 Oct – 21 Nov 2026 · Revenue First</p>
+            <h2>30-Day Cash Execution Checklist</h2>
+            <p class="lead">Check items off as completed — progress persists locally in your browser.</p>
+          </div>
+        </div>
+        <div id="checklist-container"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      Press Cafe (Pty) Ltd &amp; Farouk Gerald Pandor · Master Operating Charter v5.0 · Built on zero-burn offline-first web standards. No personal customer data or secrets are stored in this repository.
+    </div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

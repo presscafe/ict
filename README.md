@@ -1,62 +1,36 @@
-# ICT — Master Portfolio & Revenue Operating Record
+# Press Cafe & Farouk Pandor — Master Operating Hub & Production Studio (`presscafe/ict`)
 
-**Owner:** Farouk Gerald Pandor · Botswana (`BSc Animal Science, Non-Ruminant Stream`)  
-**Repository role:** Portable cross-portfolio source of truth under **Master Operating Prompt v5.0**  
-**Last full verification:** **22 October 2026** (direct API inspection across GitHub, Linear, Notion, Google Drive, Gmail, Google Calendar, Vercel and Supabase)
-
-> **Provenance:** `github.com/presscafe/ict` existed from 4 January 2019 as an empty placeholder (one 16-byte UTF-16 `README.md`, zero code). On 22 October 2026 it was repurposed into the portable Master Operating Record linking every workspace and asset.
+> **Master Operating Standard v5.0 — Integrated Master Edition**
+> Optimised strictly for legitimate near-term income in Botswana (`Financial reality → Customer problem → Evidence → Saleable offer → Customer acquisition → Agreement → Payment → Reliable delivery → Repeat revenue → Reusable assets → Sustainable growth`).
 
 ---
 
-## Privacy & Confidentiality Guardrail (`PUBLIC REPOSITORY`)
+## Live Applications Shipped Inside This Repository (`P0/mo` Static PWA)
 
-`github.com/presscafe/ict` is currently **public** (`VERIFIED`, 22 Oct 2026). Never commit:
+```bash
+npm test    # Runs full JS syntax, BDB storefront margin-lock check, & zero-PII/secret gate
+npm start   # Launches offline-first Command Studio + Hardened BDB Storefront on 0.0.0.0:4173
+```
 
-- Customer or personal contact details (phone numbers, private email addresses, KYC/ID documents)
-- Confidential supplier tier pricing, landed-cost sheets, client artwork, or contract drafts
-- API keys, tokens, credentials, or third-party/client intellectual property
-
-Private execution records live in **Linear** (`PressCafeWorld` / `PRE`), private source documents live in **Google Drive** (`00 — PressCafe Operating System`, owner-only permissions verified), and active inbox threads live under **Gmail** label `00_ACTION/*`.
-
----
-
-## Executive Snapshot (60-Second Briefing — 22 October 2026)
-
-1. **Financial truth (`VERIFIED`):** Verified portfolio revenue collected in current tracked pipelines is **P0 (`RECEIVED: P0`, `CONTRACTED: P0`)**. Closing the gap from **built assets → paid orders** is a **commercial execution problem, not a software engineering problem**. Do not start new repositories, frameworks, or rebuilds before collecting cash from existing offers.
-2. **#1 Immediate Revenue Item (`QUALIFIED / LIVE ENQUIRY` — Linear `PRE-49`):** A real Botswana corporate buyer enquired for **1600 × 900 mm rubber door mats** (black/grey). Acknowledgement requesting exact specs, quantity, artwork, and delivery town was sent on **22 Oct 2026** (Gmail thread `1a10a67eac699c1e`, tagged `00_ACTION/1_QUOTE_NOW` + `00_ACTION/3_WAITING_REPLY`). **Next move (by Sat 24 Oct 2026):** follow up directly by phone/WhatsApp if no reply, cost fresh landed trade pricing, and issue a formal 14-day valid quotation with pre-delivery payment terms.
-3. **Major Commercial Shortcut Uncovered Today (`VERIFIED` in Gmail):** Prior planning (`PRE-21` / `BDB-001..002`) assumed starting supplier outreach completely cold. Direct Gmail inspection confirmed **four active South African trade/manufacturer accounts already on record** (all tagged `00_ACTION/2_SUPPLIERS_ACTIVE`):
-   - **Sweet-Orr** — industrial & mining workwear/PPE (**active customer status & existing agreed pricing** confirmed in message `1a162e9fba1f9c12`, 22 Oct 2026; ERP cutover Mon 26 Oct 2026).
-   - **Captivity Headwear & Apparel** — blank corporate apparel, golfers, bush hats & caps (**active trade account + named JHB rep**, messages `1a018aca8adc6002` & `1a10fca3b66160ba`).
-   - **Perkal Corporate Gifts & Clothing** — 50,000+ corporate gift & drinkware catalogue (`1a15846d2c87bcd2`).
-   - **National Flag** — flags, gazebos, event display & summer promotional apparel (`1a16274225a11e73`).
-   - **Implication:** You can request updated Oct 2026 tier price lists today and complete `PRE-21` (*cost four real client jobs end-to-end*) in days rather than weeks, alongside opening **Amrod Botswana** (`BDB-001`).
-4. **True Digital Estate Across Accounts (`VERIFIED`):** Across **`presscafe`** (125 public repos + private Vercel-linked repos) and **`faroukpandor`** (40 public repos, 103 total tracked in `REPOSITORY-RELATIONSHIP-REGISTRY.md`), plus **Notion**, **Linear**, **Google Drive**, **Vercel**, and **Supabase**:
-   - **4 canonical active commercial/product pillars:** (1) `presscafe/brandinganddecorationbotswana` (**#1 cash priority**), (2) `faroukpandor/EVERYTHINGCITY` + Linear `PRE-6..PRE-11` (**SADC sourcing/agency desk**), (3) `presscafe/moruajunction` (**Botswana virtual mall PWA + Rust Axum/SQLite backend**), and (4) `faroukpandor/smartfarm` + `AGRISAGE` / `AGRISOLUTIONS` / `AnimalHealth` (**offline-first Botswana AgTech core matching owner's BSc Animal Science domain**), supported by `faroukpandor/faroukpandor.github.io`, `FAROUKPANDORCONSULTANT`, and `MOKORO---Digital-Growth-Engine` / `MOKORO-ENTERPRISE-OS`.
-   - **Strict client/third-party boundary (`DO NOT MODIFY`):** `YellowBlue*` (6 private repos), `MegaDealsMA`, `tshono.com`, shared Drive folders (`0.CLIENTS_ARTWORKS`, `Schools`, `0.BUSINESS_SERVICES`), and WCD records.
-   - **Everything else (~125 forks + ~25 unmodified starters/empty repos):** reference bookmarks and historical scaffolding — **zero new build effort permitted**.
+1. **Command & Paper-to-Plan Studio (`site/index.html`):**
+   - **Tab 1 — Handwritten Paper Notes → Venture & Action Studio:** Paste messy notebook lines, choose *What Farouk Wants* (`Core Vision`, `Fast Cash`, `Shape Together`, `Delegate`, `Keep Safe`), score with the Master Prompt §22 formula, prevent repo sprawl by routing into existing enterprises, and export directly to Arena chat, CSV, JSON, or print.
+   - **Tab 2 — Live Deal & ZAR→BWP Landed Quote Desk:** Pre-configured for **PRE-49 (`1600 × 900 mm` Rubber Door Mat — Plain & Logo Inlay)** and the **4 `PRE-21` benchmark jobs** with mandatory pre-quote safety gates (`Exact L × W confirmed`, `Vector artwork checked`, `Fresh Oct/Nov 2026 supplier quote`, `100% payment before delivery + Botswana courier at client's cost`).
+   - **Tab 3 — Cross-Portfolio Production Readiness Matrix:** Empirical compiler/security status across **232 GitHub repositories + 15 Vercel projects**.
+   - **Tab 4 — 30-Day Cash Execution Checklist:** Persistent local progress tracker.
+2. **Production-Hardened Branding & Decoration Botswana Storefront (`site/bdb-store/index.html`):**
+   - Public exposure of internal gross-margin table eliminated; `1600 × 900 mm` heavy-duty rubber & custom logo inlay entrance mats + `Goodhope / Lobatse / Kanye` delivery corridor added; Cloudflare `_headers` CSP included.
 
 ---
 
-## Repository Structure (Master Prompt §18 — Four Portable Record Types)
+## Canonical Operating Records (Master Prompt §18)
 
-| Record Type | File | Purpose | Update Cadence |
-|---|---|---|---|
-| **A. Permanent Operating Charter** | [`charter/MASTER-OPERATING-CHARTER-v5.0.md`](charter/MASTER-OPERATING-CHARTER-v5.0.md) | Master Operating Prompt v5.0 governing evidence, ethics, ownership, revenue hierarchy, and change control | Only when superseded by owner |
-| **B. Owner & Portfolio Profile** | [`profile/OWNER-AND-PORTFOLIO-PROFILE.md`](profile/OWNER-AND-PORTFOLIO-PROFILE.md) | Verified owner profile, connected systems map, account topology, and client/IP boundary rules | When accounts or boundaries change |
-| **B/D. Reconciled Asset Register** | [`portfolio-register.md`](portfolio-register.md) | Complete cross-account inventory (`presscafe` + `faroukpandor` + Notion + Drive + Vercel + Supabase) with lifecycle states and `INVEST / VALIDATE / MAINTAIN / PAUSE / ARCHIVE` decisions | When an asset changes state |
-| **C. Live Operating State** | [`operating-state.md`](operating-state.md) | Financial truth, comparative opportunity scoring, 30-day revenue plan, risk register, and cleanups awaiting owner approval | Every working session |
-| **D. Commercial Execution Kit** | [`playbooks/30-DAY-REVENUE-EXECUTION-KIT.md`](playbooks/30-DAY-REVENUE-EXECUTION-KIT.md) | Ready-to-send supplier reactivation emails, `PRE-49` follow-up script, 8 WhatsApp Business quick replies, buyer interview guide, and quote follow-up cadence | As offers are tested |
-| **Continuity Log** | [`continuity/2026-10-22-initial-activation-and-organisation.md`](continuity/2026-10-22-initial-activation-and-organisation.md) | Self-contained audit trail of verified findings, cross-tool cleanups executed on 22 Oct 2026, exact IDs, and next step | One file per substantial session |
-
----
-
-## Cross-System Tool-of-Record Map
-
-| Tool | Canonical Role | What Lives There |
+| Record Type | File Path | Purpose |
 |---|---|---|
-| **Linear** (`PressCafeWorld` / `PRE`) | Active execution & commercial pipeline | Committed tasks, owners, due dates, RFQs (`PRE-49`), Phase 0 costing gate (`PRE-21`), supplier sprints (`PRE-6..PRE-11`) |
-| **Notion** (`Master Hub` + `B&D Command Centre`) | Executive dashboard, Portfolio Register DB & Decision Log DB | High-level navigation across ventures, asset verdicts (`bbb91603-1c21-42fb-862d-7d11a0710caf`), reversible decisions (`3161878a-80f4-4d96-941d-10c21143087a`) |
-| **Google Drive** (`00 — PressCafe Operating System`) | Private canonical file store | Owner-only docs, commercial evidence (`50 - Commercial and Operations`), sensitive finance/legal files (`60 - Finance and Legal`) |
-| **Gmail** (`presscafeworld@gmail.com`) | External customer & supplier communications | Live RFQs & warm supplier threads surfaced under `00_ACTION/1_QUOTE_NOW`, `00_ACTION/2_SUPPLIERS_ACTIVE`, `00_ACTION/3_WAITING_REPLY` |
-| **Google Calendar** (`primary`) | Time-specific external calls & deadlines only | Confirmed appointments; tasks without a fixed clock time belong in Linear |
-| **GitHub** (`presscafe/*` & `faroukpandor/*`) | Versioned code, static PWAs & portable Markdown governance | `presscafe/ict` (this record), `brandinganddecorationbotswana`, `moruajunction`, `faroukpandor.github.io`, `smartfarm`, private venture repos |
+| **Type A — Charter** | [`charter/MASTER-OPERATING-CHARTER-v5.0.md`](charter/MASTER-OPERATING-CHARTER-v5.0.md) | Governance rules, epistemic tags, anti-busywork gates, §28 change control |
+| **Type B — Profile** | [`profile/OWNER-AND-PORTFOLIO-PROFILE.md`](profile/OWNER-AND-PORTFOLIO-PROFILE.md) | Owner profile (`BSc Animal Science — Non-Ruminant Stream`), 9-platform estate & boundaries |
+| **Type B/D — Asset Matrix** | [`portfolio-register.md`](portfolio-register.md) | Complete venture register (`ENT-01`..`ENT-06`), client hands-off list & fork cleanup |
+| **Type C — Operating State** | [`operating-state.md`](operating-state.md) | Verified financial truth (`P0` baseline), live RFQ status, §22 scores & 30-day revenue plan |
+| **Type D — Commercial Playbook** | [`playbooks/30-DAY-REVENUE-EXECUTION-KIT.md`](playbooks/30-DAY-REVENUE-EXECUTION-KIT.md) | Supplier reactivation templates, WhatsApp scripts, 12-buyer interview & quote cadence |
+| **Type D — Paper Intake System** | [`intake/WRITTEN-TASKS-INTAKE-PROTOCOL.md`](intake/WRITTEN-TASKS-INTAKE-PROTOCOL.md) | Zero-friction pipeline for turning handwritten notebook pages into ranked execution |
+| **Type D — Repo Prod Audit & Patches** | [`production-readiness/PRODUCTION-READINESS-AUDIT-AND-RUNBOOK.md`](production-readiness/PRODUCTION-READINESS-AUDIT-AND-RUNBOOK.md) | Verified compiler audit & 5 ready-to-apply `.patch` bundles + safe archival scripts |
+| **Continuity Handover Logs** | [`continuity/`](continuity/) | Full audit trail of every cross-platform change, ID, and reversal method |
