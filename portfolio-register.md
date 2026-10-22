@@ -39,13 +39,24 @@
 
 ---
 
-## 3. Client & Third-Party Restricted Repositories (`DO NOT MODIFY / DO NOT MONETISE INDEPENDENTLY`)
+## 3. Canonical 12-Client & Mandate Boundary Register (`STRICT HANDS-OFF / SEPARATE CLIENT MANDATES`)
 
-| Location | Items | Classification | Governance Rule |
-|---|---|---|---|
-| **`github.com/faroukpandor` (Private)** | `yellow-blue-pwa`, `yellowblue-pwa`, `YELLOWBLUEPWA`, `YELLOW-BLUE-LOGISTICS`, `YELLOW-BLUE-CARGO`, `YELLOW-BLUE-PROGRESSIVE-WEB-APPLICATION-3`, `YB17.12.2025` | `CLIENT-OWNED` / `CLIENT-CONTROLLED` | Touch only on explicit client instruction; never reuse private code, assets, or customer data; no unapproved public case-study claims. |
-| **`github.com/faroukpandor` (Private)** | `MegaDealsMA---B2B-B2C-E-Commerce-Platform`, `tshono.com---Digital-Prosperity-Ecosystem` | `CLIENT-OWNED` / `THIRD-PARTY` | Same strict client boundary. |
-| **Google Drive Shared Trees** | `0.CLIENTS_ARTWORKS`, `Schools`, `0.BUSINESS_SERVICES` | `CLIENT-OWNED` / `CO-OWNED` shared folders | Account is collaborator/writer on several trees; preserve structure and never publish client logos/embroidery tapes as stock designs. |
+Per explicit owner confirmation on **22 October 2026**, all **12 client / mandate accounts** below are strictly fenced from Press Cafe owned balance-sheet IP, excluded from automated repo archival/patching unless written client instruction is given, and stripped of private PII on public repositories:
+
+| Client ID | Client / Principal | Mandate / Account Scope | Linked GitHub / Vercel / Google Drive Assets | Strict Governance Rule |
+|---|---|---|---|---|
+| **`CL-01`** | **Andrew Motlhajoe** | **Selokolela Farm Land** (Kanye–Jwaneng–Goodhope Southern District corridor) — seeking property developers / commercial agri-investors / lease partners | Staged Apex Properties co-broking outreach; master tracker in Google Sheet Tab `07` | Commission / introduction mandate only; never represent land as owned by Press Cafe. |
+| **`CL-02`** | **Futurewise** *(Futurewise Education)* | Education & training client account | Google Drive folders `FUTUREWISE EDUCATION` (`0B9AYvUYgUzJHZTRGV01LNjBwNXM` & `...WU0`) | Zero deletions on client Drive archives; separate client account. |
+| **`CL-03`** | **YellowBlue** | Logistics, cargo & PWA client suite | Private repos: `yellow-blue-pwa`, `yellowblue-pwa`, `YELLOWBLUEPWA`, `YELLOW-BLUE-LOGISTICS`, `YELLOW-BLUE-CARGO`, `YELLOW-BLUE-PROGRESSIVE-WEB-APPLICATION-3`, `YB17.12.2025` | Strict hands-off on code/archival/publicity without written client instruction. |
+| **`CL-04`** | **Shenata** | Client brand & enterprise account | Protected client workspace (`0` public exposures verified across GitHub & Vercel) | Strict client fence; keep 100% separate from owned Press Cafe balance sheet. |
+| **`CL-05`** | **MegaDealsMA** | B2B / B2C e-commerce platform client | Private repo: `MegaDealsMA---B2B-B2C-E-Commerce-Platform` | Strict hands-off on code/archival/publicity. |
+| **`CL-06`** | **Tshono** (`tshono.com`) | Digital Prosperity Ecosystem client | Private repo: `tshono.com---Digital-Prosperity-Ecosystem` | Strict hands-off; keep completely distinct from `presscafe/moruajunction`. |
+| **`CL-07`** | **CNS** *(CNS Enterprises)* | 6-enterprise group, ERP, web apps & corporate apparel client | Private repo `presscafe/cns` (PR #1) + public repo `presscafe/next-netlify-starter-cns` + Drive `.EMB` files (`botslife CNS.EMB`, `barclays CNS CAP.EMB`) | **Reclassified from starter to Strict Client Fence (`CL-07`):** excluded from default automated patching & fork archival. |
+| **`CL-08`** | **Mosha** *(Mosha Investments)* | Corporate investment & brand client *(distinct from Identity Concept)* | Drive folders: `MOSHA INVESTMENTS`, `MOSHA SLAVE DRIVE`, `MOSHA GRAPHICS`, `MOSHA LOGO DVELOPMENT`, `Mosha Company Profile` | Distinct client separate from `CL-09`; zero Drive deletions. |
+| **`CL-09`** | **Identity Concept** | Web / TinaCMS & brand identity client *(distinct from Mosha)* | Private repo `presscafe/IDENTITY_CONCEPT_tina-cloud-starter` + live Vercel project `identity-concept-tina-cloud-starter` (`READY`) | Distinct client separate from `CL-08`; live Vercel deployment untouched pending client upgrade approval. |
+| **`CL-10`** | **WCD** | Graphic design / print agency client & trade partner | Shared Drive folders `0. WCD CLIENTS ARTWORKS` / `0.CLIENTS_ARTWORKS` & `Schools` | Non-destructive read/catalogue rule (`0` source deletions); high-value wholesale mat & embroidery trade partner. |
+| **`CL-11`** | **Mopipi Salon** | Beauty & hair salon client | Client brand scope (custom salon entrance mats, embroidered stylist aprons/tunics, booking page) | Strict client fence. |
+| **`CL-12`** | **Ishmael Koos** | **Non-Ruminant Agribusiness Mandate:** 35-day (`2.0 kg`) contract broiler growing / integrator off-take (`P 24.50/kg` liveweight = `P 49.00/2kg bird` buy-back vs toll growing fee) | Live Google Sheet Tab `08_ISHMAEL_KOOS_BROILER_MODEL` + Bankable Pitch Doc (`16nUJkWguxDthvyiGzv1WfmQNNi96oB7FO8dAkW-nIGk`) + Drive `ISHMAEL.EMB` | Advisory mandate led under owner's verified `BSc in Animal Science (Non-Ruminant Stream)` credential. |
 
 ---
 
@@ -53,10 +64,9 @@
 
 Archiving repositories on GitHub is a **RED / admin-permission action** (requires clicking *Settings → Archive this repository* or running `gh repo archive` with `delete_repo`/`admin` scope). None were deleted or modified without permission; here is your exact verified cleanup list whenever you spend 10 minutes tidying your public GitHub profile:
 
-1. **5 Empty `0 KB` Repositories (`ARCHIVE` or `DELETE` immediately — contain zero commits):**
+1. **5 Empty `0 KB` Repositories (`ARCHIVE` non-destructively — contain zero commits):**
    - `presscafe/rust-ecommerce-pwa` · `presscafe/laravel-ecommerce-pwa` · `presscafe/js-ecommerce-pwa` · `presscafe/meghna-hugo` · `presscafe/1-click-hugo-cms`
-2. **Broken / Superseded Starter Clones on `presscafe` (`ARCHIVE` — zero commercial value):**
-   - `next-netlify-starter-cns` *(note: `_drive-work/0.IMAGES-SORTED.md` inventory already preserved; Tina build broken — see `AUDIT-2026-10-21.md`)*
+2. **Superseded Owned Starter Clones on `presscafe` (`ARCHIVE` — zero commercial value; keep `barebones-starter` live as SME Site Factory & keep `next-netlify-starter-cns` fenced under Client `CL-07`):**
    - `next-netlify-starter`, `gatsby-ecommerce-theme`, `gatsby-starter-contentful-homepage`, `gatsby-starter-forestry`, `one-click-hugo-cms`, `presscafe-hugo`, `hugo-meghna-forestry`, `hugo-meghna-forestry2`, `FORESTRY1-HUGO-MEGHNA`, `hugo-parsa-forestry`, `kross-hugo`, `hyas`, `zola-blog`, `corporate-single-page`, `corporate-single-page-static`, `username.github.io`, `hello-world`, `reka-botswana` *(superseded by `moruajunction`)*, `healthhaven-eleventy-netlify-boilerplate` *(verify client boundary first)*.
 3. **90 Pristine Upstream Forks on `presscafe` + 35 Forks on `faroukpandor`:**
    - **Verified (`22 Oct 2026`):** 12 sampled recent forks (`awesome-quant`, `DevOps-Bash-tools`, `strapi`, `freqtrade`, `astro`, `odoo`, `winutil`, `hummingbot`, `Lean`, `g-e-v`, `personal`, `about`) contain **0 commits authored by `presscafe`**. Use **GitHub Stars / Lists** instead of Forking to bookmark reference repos in future so your public profile highlights your real work.

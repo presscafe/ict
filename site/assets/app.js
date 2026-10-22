@@ -110,6 +110,21 @@ const DEAL_PRESETS = [
     lead: "10–14 working days from vector artwork sign-off & 100% payment"
   },
   {
+    id: "cl12_ishmael_audit",
+    label: "CL-12 · Ishmael Koos Broiler Outgrower Advisory & Biosecurity Pack",
+    item: "35-Day (2.0kg @ P24.50/kg Liveweight) Broiler House Biosecurity Audit, Integrator Pitch Submission + Biosecurity Conti Suits & Footbath Mats",
+    supplier: "Farouk G. Pandor (BSc Animal Science — Non-Ruminant Stream) + B&D Biosecurity Pack",
+    qty: 1,
+    zar: 1650,
+    fx: 1.0,
+    freight: 0,
+    decor: 350,
+    setup: 1500,
+    margin: 45,
+    courier: 0,
+    lead: "Immediate digital model + scheduled on-farm house inspection prior to integrator submission"
+  },
+  {
     id: "pre21_workwear",
     label: "PRE-21A · 50× Reflective Conti Suits (Sweet-Orr)",
     item: "2-Piece Polycotton Conti Suit with Reflective Tape + Left-Chest Embroidery",
@@ -198,20 +213,20 @@ const REPO_MATRIX = [
     action: "git apply production-readiness/patches/moruajunction-prod.patch"
   },
   {
-    tier: "Tier 3 · Starter Hygiene",
-    repo: "presscafe/next-netlify-starter-cns",
-    status: "BUILD GREEN WITH PATCH",
-    badge: "green",
-    findings: "Verified clean Next.js 16.4.2 static build (3/3 pages in 2.6s), removed exposed _drive-work/ TSV scratch artifacts, and reconciled stale AUDIT-2026-10-21.md.",
-    action: "git apply production-readiness/patches/next-netlify-starter-cns-prod.patch"
+    tier: "Client Mandate Fence",
+    repo: "CNS (`presscafe/cns` + `next-netlify-starter-cns`)",
+    status: "STRICT CLIENT BOUNDARY",
+    badge: "red",
+    findings: "Reclassified out of owned starters into Strict Client Fence (`CL-07`: CNS Enterprises 6-app ERP & web suite + CNS `.EMB` Drive archives). Excluded from automated patching & fork archival.",
+    action: "CLIENT MANDATE — ACT ONLY ON CNS INSTRUCTION"
   },
   {
     tier: "Tier 2 · SME Client Site Factory",
     repo: "presscafe/barebones-starter (Live Vercel + Private Repo)",
-    status: "KEEP & MONETIZE (SECURE TOKEN)",
+    status: "ENCRYPTED & READY TO MONETIZE",
     badge: "green",
-    findings: "Live Next.js + TinaCMS visual site builder (`barebones-starter-presscafe.vercel.app`)! Clone per SME website client (P4.5k–P12k setup, $0/mo hosting) so clients edit text/images visually at `/admin`. Switch `TINA_TOKEN` env var to Sensitive in Vercel Settings.",
-    action: "Vercel -> Settings -> Environment Variables -> Toggle Sensitive on TINA_TOKEN"
+    findings: "ENCRYPTED DONE (`TINA_TOKEN` upgraded to `encrypted` on `barebones-starter`, `tina-cloud-starter1`, and `tina-cloud-starter-ssmab`)! Ready to clone per SME website client (P4.5k–P12k setup, $0/mo hosting).",
+    action: "Live at barebones-starter-presscafe.vercel.app"
   },
   {
     tier: "Zero-Pause Cloud Fix",
@@ -223,19 +238,19 @@ const REPO_MATRIX = [
   },
   {
     tier: "Client Mandate Fence",
-    repo: "Mosham Identity Concept · Futurewise · Mopipi Salon · Andrew Motlhajoe (Selokolela Land)",
-    status: "STRICT CLIENT BOUNDARY",
-    badge: "red",
-    findings: "`IDENTITY_CONCEPT_tina-cloud-starter` fenced under Mosham Identity Concept (upgrade Node 18->22 & mark token Sensitive only with client sign-off); Futurewise & Mopipi Salon assets fenced; Selokolela farm developer co-broking staged cleanly.",
-    action: "SEPARATE CLIENT MANDATE — NEVER MIX WITH OWNED BALANCE SHEET"
+    repo: "Ishmael Koos (35d 2.0kg Broiler @ P24.50/kg) · Andrew Motlhajoe (Selokolela Land)",
+    status: "LIVE MODEL + PITCH PACK READY",
+    badge: "amber",
+    findings: "BSc Animal Science (Non-Ruminant) live Google Sheet financial model (`Tab 08`, EPEF=336.9) + Bankable Integrator Pitch Doc built! Proves P24.50 = BWP/kg liveweight (=P49/2kg bird, ~P135.5k/yr net per 5,000 birds) vs Tripartite Feed+Abattoir Cession.",
+    action: "Open Google Sheet Tab 08 + Ishmael Koos Pitch Doc"
   },
   {
     tier: "Client Hands-Off",
-    repo: "yellow-blue* (7 repos), MegaDealsMA, tshono.com, WCD Client Artworks",
-    status: "STRICT HANDS-OFF",
+    repo: "YellowBlue · Shenata · MegaDealsMA · Tshono · Mosha · Identity Concept · Futurewise · WCD · Mopipi Salon",
+    status: "ALL 12 CLIENTS FENCED",
     badge: "red",
-    findings: "Client-owned / shared repositories & Drive folders protected under Master Prompt §5 & §14. Zero files deleted across Drive & Gmail; hard-blocked from unauthorized edits or publicity.",
-    action: "DO NOT TOUCH WITHOUT WRITTEN CLIENT AUTHORITY"
+    findings: "All 12 client mandates cleanly separated (`Mosha` distinct from `Identity Concept`; `CNS` distinct; `Shenata`, `Futurewise`, `WCD`, `Mopipi Salon` fenced). Zero files deleted across Drive & Gmail.",
+    action: "SEPARATE CLIENT MANDATES — ZERO MIXING WITH OWNED IP"
   }
 ];
 

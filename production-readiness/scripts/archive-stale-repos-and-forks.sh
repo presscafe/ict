@@ -8,11 +8,12 @@ set -euo pipefail
 
 MODE="${1:---dry-run}"
 
-# STRICT CLIENT / SHARED BOUNDARY BLOCKLIST — NEVER MODIFY OR ARCHIVE WITHOUT WRITTEN AUTHORITY
-BLOCKED_REGEX='^(faroukpandor/(yellow-blue-pwa|yellowblue-pwa|YELLOWBLUEPWA|YELLOW-BLUE-LOGISTICS|YELLOW-BLUE-CARGO|YELLOW-BLUE-PROGRESSIVE-WEB-APPLICATION-3|YB17\.12\.2025|MegaDealsMA---B2B-B2C-E-Commerce-Platform|tshono\.com---Digital-Prosperity-Ecosystem))$'
+# STRICT 12-CLIENT / SHARED BOUNDARY BLOCKLIST — NEVER MODIFY OR ARCHIVE WITHOUT WRITTEN CLIENT AUTHORITY
+# Covers: Andrew Motlhajoe, Futurewise, YellowBlue, Shenata, MegaDealsMA, Tshono, CNS, Mosha, Identity Concept, WCD, Mopipi Salon, Ishmael Koos
+BLOCKED_REGEX='((yellow-blue|yellowblue|YELLOWBLUE|YELLOW-BLUE|YB17\.12\.2025|MegaDealsMA|tshono|cns|CNS|IDENTITY_CONCEPT|identity-concept|shenata|mosha|futurewise|mopipi|wcd|motlhajoe|ishmael|koos))'
 
-# CORE ACTIVE REPOSITORIES KEPT LIVE & UNARCHIVED
-KEEP_LIVE_REGEX='^(presscafe/(ict|brandinganddecorationbotswana|moruajunction|next-netlify-starter-cns|presscafe|reka-botswana|ssmab|tradingbot)|faroukpandor/(faroukpandor\.github\.io|smartfarm|agrisphere|ghost-farouk))$'
+# CORE ACTIVE OWNED REPOSITORIES KEPT LIVE & UNARCHIVED
+KEEP_LIVE_REGEX='^(presscafe/(ict|brandinganddecorationbotswana|moruajunction|barebones-starter|presscafe|reka-botswana|ssmab|tradingbot)|faroukpandor/(faroukpandor\.github\.io|smartfarm|agrisphere|ghost-farouk))$'
 
 for owner in presscafe faroukpandor; do
   echo "=== Scanning $owner (mode: $MODE) ==="

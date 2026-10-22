@@ -69,10 +69,6 @@ apply_patch \
   "npm install --no-audit --no-fund && npm run check && npm run build" \
   "fix(data): correct Botswana district/town geography, add pilot disclosure banner, sync dataset check"
 
-apply_patch \
-  "presscafe/next-netlify-starter-cns" \
-  "next-netlify-starter-cns-prod.patch" \
-  "npm install --no-audit --no-fund && npm run build" \
-  "chore(hygiene): remove scratch _drive-work TSVs and reconcile Next 16.4.2 build status"
-
-echo "All 5 flagship repositories patched and build-verified cleanly."
+# NOTE: presscafe/next-netlify-starter-cns and presscafe/cns belong to Client CL-07 (CNS Enterprises)
+# and are strictly excluded from default automated execution per the 12-Client Boundary Rule.
+echo "All 4 owned flagship repositories patched and build-verified cleanly (Client CNS excluded by default)."
