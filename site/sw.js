@@ -1,10 +1,11 @@
-const CACHE = "presscafe-command-studio-v1";
+const CACHE = "presscafe-command-studio-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./assets/styles.css",
   "./assets/app.js",
+  "./assets/emb-mockup-studio.js",
   "./bdb-store/index.html",
   "./bdb-store/config.js",
   "./bdb-store/assets/styles.css",

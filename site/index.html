@@ -28,16 +28,19 @@
           </div>
         </div>
         <div class="header-actions no-print">
-          <a class="btn btn-soft" href="bdb-store/index.html">Launch Fixed B&amp;D Storefront →</a>
+          <a class="btn btn-soft" href="https://docs.google.com/spreadsheets/d/1aC4IhLXcyt1q6IZKYNZ-QNql9FaLe0RbVltBKbzyXDM/edit" target="_blank" rel="noopener">Open Live Google Sheet Hub ↗</a>
+          <a class="btn btn-soft" href="https://docs.google.com/presentation/d/1OTgoximHUT1vpdZpIhZbzt7z4jfZ5wdmuT4yP40wSO0/edit" target="_blank" rel="noopener">Google Slides Deck ↗</a>
+          <a class="btn btn-soft" href="bdb-store/index.html">Launch B&amp;D Storefront →</a>
           <button type="button" class="btn" id="btn-export-all">Export Studio JSON</button>
         </div>
       </div>
 
       <nav class="tab-bar no-print" role="tablist" aria-label="Operating studio views">
-        <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="paper">1. Handwritten Paper Notes → Plan</button>
-        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="deal">2. Deal &amp; ZAR→BWP Quote Desk (PRE-49)</button>
-        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="repos">3. Repo &amp; Vercel Production Matrix</button>
-        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="plan30">4. 30-Day Revenue Checklist</button>
+        <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="mockup">1. Instant .EMB Crest, Uniform &amp; Mat Mockup Studio</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="paper">2. Handwritten Paper Notes → Plan</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="deal">3. Deal &amp; ZAR→BWP Quote Desk (PRE-49)</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="repos">4. Repo, Vercel &amp; Zero-Pause Matrix</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="plan30">5. 30-Day Revenue Checklist</button>
       </nav>
     </div>
   </header>
@@ -66,8 +69,151 @@
       </article>
     </section>
 
+    <!-- TAB 0: INSTANT ZERO-DONGLE .EMB CREST, SCHOOL UNIFORM & BW BRANDED MAT MOCKUP STUDIO -->
+    <section id="tab-mockup" class="tab-view">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">60-Second Visual Closing Engine · Zero Wilcom Dongle · Zero Cloud Pause</p>
+            <h2>Instant .EMB School Crest, Corporate Uniform &amp; BW Branded Mats Proof Studio</h2>
+            <p class="lead">
+              Drop <strong>any industrial <code>.EMB</code> or <code>.DST</code> file</strong> straight from your <a href="https://drive.google.com/drive/folders/1wN47a2KC5MCr8Vvh4k6Bjabe4EAI7ilq" target="_blank" rel="noopener"><strong>82-School Google Drive Vault ↗</strong></a> — OR drop <strong>any prospect's Facebook profile logo (<code>.PNG/.JPG/.SVG</code>)</strong> — to generate an instant <code>1600 × 1120</code> HD Proof &amp; 3-Tier BWP Quote Card in 1 second right inside your browser!
+            </p>
+          </div>
+          <div class="btn-row no-print" style="margin-top:0">
+            <a class="btn btn-soft" href="https://drive.google.com/drive/folders/1wN47a2KC5MCr8Vvh4k6Bjabe4EAI7ilq" target="_blank" rel="noopener">Open 82-School .EMB Folder ↗</a>
+            <button type="button" class="btn btn-primary" id="btn-download-proof">Download HD Proof Card (.PNG)</button>
+            <button type="button" class="btn" id="btn-copy-proof-img">Copy Proof Image to Clipboard (Ctrl+V in WhatsApp)</button>
+          </div>
+        </div>
+
+        <div class="callout callout-green">
+          <strong>Why This Fixes Facebook Ghosting Instantly:</strong> Instead of replying with naked text prices and waiting days for vector files, drop the lead's Facebook logo or school <code>.EMB</code> file below, paste the HD 4-in-1 Proof Card straight into WhatsApp/Messenger, and close with the 3-tier BWP anchor script!
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="field">
+              <label for="mk-preset-select">1. Quick-Load Preset (BW Branded Mats Funnel or 82-School Campaign Cluster)</label>
+              <select id="mk-preset-select"></select>
+              <small id="mk-preset-note"></small>
+            </div>
+
+            <div class="field" style="margin-top:0.85rem">
+              <label for="mk-file-input">2. Drop Real <code>.EMB</code>, <code>.DST</code>, <code>.PNG</code>, <code>.JPG</code>, or <code>.SVG</code> Crest / Client Logo (100% Local in Browser)</label>
+              <input type="file" id="mk-file-input" accept=".emb,.EMB,.dst,.DST,.png,.jpg,.jpeg,.svg,.webp" />
+              <small id="mk-file-status">Using instant generated vector shield (drop any .EMB, .DST, .PNG or .JPG file anytime).</small>
+            </div>
+
+            <div class="btn-row no-print" style="margin-top:0.5rem;margin-bottom:0.85rem">
+              <label class="gate-item" style="margin:0;padding:0.4rem 0.7rem">
+                <input type="checkbox" id="mk-key-bg" checked />
+                <span>Auto-remove white/solid background from uploaded logo / .EMB icon</span>
+              </label>
+              <button type="button" class="btn" id="btn-reset-crest">Use Vector Shield</button>
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="mk-name">School / Client Name</label>
+                <input type="text" id="mk-name" value="KFC / Forecourt QSR Storefront" />
+              </div>
+              <div class="field">
+                <label for="mk-motto">Motto / Tagline on Mat &amp; Crest</label>
+                <input type="text" id="mk-motto" value="FRESH · FAST · SAFE ENTRY" />
+              </div>
+              <div class="field">
+                <label for="mk-init">Shield Initials</label>
+                <input type="text" id="mk-init" maxlength="5" value="QSR" />
+              </div>
+              <div class="field">
+                <label for="mk-matdim">Entrance Mat Size Spec</label>
+                <input type="text" id="mk-matdim" value="1500 × 900 mm" />
+              </div>
+              <div class="field">
+                <label for="mk-shirt">Shirt Pocket Fabric</label>
+                <select id="mk-shirt">
+                  <option value="#ffffff">Crisp White Poplin Shirt</option>
+                  <option value="#dbeafe">Sky-Blue School / Corporate Shirt</option>
+                  <option value="#e2e8f0"> Dove Grey School Shirt</option>
+                  <option value="#fef9c3">Lemon / Cream Pre-School Top</option>
+                  <option value="#e7dfc8">Khaki Safari / Agri Work Shirt</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="mk-blazer">Blazer / Golfer Fabric</label>
+                <select id="mk-blazer">
+                  <option value="#b91c1c">Crimson / QSR Red</option>
+                  <option value="#0f172a">Executive Navy / Charcoal</option>
+                  <option value="#1e3a5f">School Blazer Navy</option>
+                  <option value="#14532d">Bottle Green Blazer / Jersey</option>
+                  <option value="#7f1d1d">Maroon School Blazer / Jersey</option>
+                  <option value="#1e3a8a">Royal Blue Sports / Tracktop</option>
+                  <option value="#0f766e">Teal Corporate Golfer</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="mk-primary">Vector Shield Primary</label>
+                <input type="color" id="mk-primary" value="#b91c1c" />
+              </div>
+              <div class="field">
+                <label for="mk-accent">Vector Shield Gold/Trim</label>
+                <input type="color" id="mk-accent" value="#f59e0b" />
+              </div>
+              <div class="field">
+                <label for="mk-t1-label">Option 1 (Starter) Label</label>
+                <input type="text" id="mk-t1-label" value="Single Door Pilot (1× 1500×900mm)" />
+              </div>
+              <div class="field">
+                <label for="mk-t1-price">Option 1 Price (BWP)</label>
+                <input type="number" id="mk-t1-price" step="10" value="1950" />
+              </div>
+              <div class="field">
+                <label for="mk-t2-label">Option 2 (⭐ Popular) Label</label>
+                <input type="text" id="mk-t2-label" value="⭐ 2-Door Entrance + Counter Pack (Save 10%)" />
+              </div>
+              <div class="field">
+                <label for="mk-t2-price">Option 2 Price (BWP)</label>
+                <input type="number" id="mk-t2-price" step="10" value="3500" />
+              </div>
+              <div class="field">
+                <label for="mk-t3-label">Option 3 (Bulk / Rollout) Label</label>
+                <input type="text" id="mk-t3-label" value="10+ Multi-Store Rollout Rate (Each)" />
+              </div>
+              <div class="field">
+                <label for="mk-t3-price">Option 3 Price (BWP)</label>
+                <input type="number" id="mk-t3-price" step="10" value="1650" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <canvas
+              id="mockup-proof-canvas"
+              width="1600"
+              height="1120"
+              style="width:100%;height:auto;border-radius:10px;border:1px solid #cbd5e1;box-shadow:0 8px 24px rgba(15,23,42,0.08);background:#fff"
+            ></canvas>
+
+            <h3 style="margin-top:1.1rem">Ready-to-Send WhatsApp / Facebook Messenger Closing Script</h3>
+            <div class="filter-row no-print" style="margin-bottom:0.65rem">
+              <button type="button" class="chip active" data-script-stage="fb-mat">FB / WhatsApp Mat Lead</button>
+              <button type="button" class="chip" data-script-stage="school-pitch">School Principal / Bursar Pitch</button>
+              <button type="button" class="chip" data-script-stage="agency-partner">Marketing Agency Reseller</button>
+              <button type="button" class="chip" data-script-stage="nudge-48h">48-Hour Follow-Up Close</button>
+            </div>
+            <pre class="preview-box" id="mk-script-preview"></pre>
+            <div class="btn-row no-print">
+              <button type="button" class="btn btn-primary" id="btn-copy-mk-script">Copy WhatsApp / Messenger Script</button>
+              <a class="btn btn-soft" href="https://docs.google.com/spreadsheets/d/1aC4IhLXcyt1q6IZKYNZ-QNql9FaLe0RbVltBKbzyXDM/edit" target="_blank" rel="noopener">Log Lead in Master Google Sheet ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- TAB 1: HANDWRITTEN PAPER TASKS STUDIO -->
-    <section id="tab-paper" class="tab-view">
+    <section id="tab-paper" class="tab-view" hidden>
       <div class="panel">
         <div class="panel-header">
           <div>
@@ -259,5 +405,6 @@
   </footer>
 
   <script src="assets/app.js"></script>
+  <script src="assets/emb-mockup-studio.js"></script>
 </body>
 </html>

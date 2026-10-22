@@ -206,27 +206,35 @@ const REPO_MATRIX = [
     action: "git apply production-readiness/patches/next-netlify-starter-cns-prod.patch"
   },
   {
-    tier: "Vercel Hygiene",
-    repo: "15 Hobby Projects (team_7BlyEqM9QEO8AFj0sn6kXqx4)",
-    status: "ROTATE TOKENS & PRUNE",
-    badge: "amber",
-    findings: "0 custom domains ($0 spend). Rotate plain-text TINA_TOKEN env vars on barebones-starter, tina-cloud-starter-ssmab & identity-concept-tina-cloud-starter; remove 8 errored/unbuilt starter clones.",
-    action: "See production-readiness/PRODUCTION-READINESS-AUDIT-AND-RUNBOOK.md"
+    tier: "Tier 2 · SME Client Site Factory",
+    repo: "presscafe/barebones-starter (Live Vercel + Private Repo)",
+    status: "KEEP & MONETIZE (SECURE TOKEN)",
+    badge: "green",
+    findings: "Live Next.js + TinaCMS visual site builder (`barebones-starter-presscafe.vercel.app`)! Clone per SME website client (P4.5k–P12k setup, $0/mo hosting) so clients edit text/images visually at `/admin`. Switch `TINA_TOKEN` env var to Sensitive in Vercel Settings.",
+    action: "Vercel -> Settings -> Environment Variables -> Toggle Sensitive on TINA_TOKEN"
   },
   {
-    tier: "Archive / Fork Cleanup",
-    repo: "125 Upstream Forks + 5 Empty 0-KB Repos",
-    status: "DRY-RUN SCRIPT READY",
-    badge: "neutral",
-    findings: "90 forks on presscafe + 35 forks on faroukpandor bury real Botswana products. Archive non-destructively (reversible in 1 click; zero permanent deletion).",
-    action: "bash production-readiness/scripts/archive-stale-repos-and-forks.sh"
+    tier: "Zero-Pause Cloud Fix",
+    repo: "Supabase Free Tier + Google Sheets Webhook (`scripts/`)",
+    status: "AUTOMATED $0/MO FOREVER",
+    badge: "green",
+    findings: "Eliminates 7-day Supabase free-tier auto-pause permanently: (1) `.github/workflows/supabase-keepalive.yml` pings PostgREST + Auth every Monday & Thursday at 06:00 CAT; (2) `google-sheets-webhook.gs` writes storefront quotes straight to Google Sheets 24/7 with zero server to sleep!",
+    action: "production-readiness/scripts/supabase-keepalive-workflow.yml + google-sheets-webhook.gs"
+  },
+  {
+    tier: "Client Mandate Fence",
+    repo: "Mosham Identity Concept · Futurewise · Mopipi Salon · Andrew Motlhajoe (Selokolela Land)",
+    status: "STRICT CLIENT BOUNDARY",
+    badge: "red",
+    findings: "`IDENTITY_CONCEPT_tina-cloud-starter` fenced under Mosham Identity Concept (upgrade Node 18->22 & mark token Sensitive only with client sign-off); Futurewise & Mopipi Salon assets fenced; Selokolela farm developer co-broking staged cleanly.",
+    action: "SEPARATE CLIENT MANDATE — NEVER MIX WITH OWNED BALANCE SHEET"
   },
   {
     tier: "Client Hands-Off",
-    repo: "yellow-blue* (7 repos), MegaDealsMA, tshono.com",
+    repo: "yellow-blue* (7 repos), MegaDealsMA, tshono.com, WCD Client Artworks",
     status: "STRICT HANDS-OFF",
     badge: "red",
-    findings: "Client-owned / shared repositories protected under Master Prompt §5 & §14. Hard-blocked from automated edits, archival, or publicity.",
+    findings: "Client-owned / shared repositories & Drive folders protected under Master Prompt §5 & §14. Zero files deleted across Drive & Gmail; hard-blocked from unauthorized edits or publicity.",
     action: "DO NOT TOUCH WITHOUT WRITTEN CLIENT AUTHORITY"
   }
 ];

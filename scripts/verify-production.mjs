@@ -56,8 +56,11 @@ const requiredFiles = [
   "production-readiness/patches/faroukpandor-github-io-prod.patch",
   "production-readiness/patches/smartfarm-prod.patch",
   "production-readiness/patches/next-netlify-starter-cns-prod.patch",
+  "production-readiness/scripts/supabase-keepalive-workflow.yml",
+  "production-readiness/scripts/google-sheets-webhook.gs",
   "site/index.html",
   "site/assets/app.js",
+  "site/assets/emb-mockup-studio.js",
   "site/assets/styles.css",
   "site/sw.js",
   "site/manifest.webmanifest",
@@ -79,6 +82,7 @@ check("All canonical operating docs, patches, and PWA files exist", () => {
 check("All JavaScript/MJS bundles pass node --check syntax gate", () => {
   for (const jsFile of [
     "site/assets/app.js",
+    "site/assets/emb-mockup-studio.js",
     "site/sw.js",
     "site/bdb-store/config.js",
     "site/bdb-store/assets/app.js",
@@ -114,6 +118,7 @@ check("Zero leaked API tokens, private keys, or customer PII in repository docs 
     { name: "GitHub token", re: /gh[pousr]_[A-Za-z0-9_]{20,}/ },
     { name: "Private key block", re: /-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----/ },
     { name: "Customer private email", re: /equiclotech@/i },
+    { name: "Confidential mat production source leak", re: /MAT-BW-LOCAL|rubber mat maker/i },
     { name: "Raw +267 phone digits", re: /\+?267[\s-]?7[0-9]{7}/ }
   ];
 
